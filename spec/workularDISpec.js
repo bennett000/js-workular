@@ -85,6 +85,7 @@ describe('workular dependency injection (newDI)', function () {
             expect(t1.get('six')).toBe('6');
             expect(t1.get('seven').value).toBe(7);
         });
+
         it('should contain the given value', function () {
             var t1 = workular.newDI({
                                         nameSpace: 'factory',
@@ -93,6 +94,7 @@ describe('workular dependency injection (newDI)', function () {
                                     });
             expect(t1.get('test')).toBe('Higgins Rocks!');
         });
+
         it('should throw on truthy malformated inputs', function () {
             expect(function () {
                 workular.newDI('Cheese');
@@ -110,13 +112,42 @@ describe('workular dependency injection (newDI)', function () {
         });
     });
 
+    describe ('DIs should co-exist', function () {
+        var di1, di2, di3;
+        beforeEach(function () {
+            di1 = workular.newDI();
+            di2 = workular.newDI();
+            di3 = workular.newDI();
+        });
+
+        it('should maintain separate collections', function () {
+            var result1 = 'Big Toe', result2 = 'Middle Toe', result3 = 'Pinky Toe',
+                t = 'toe';
+            di1.factory(t, function () {
+                return result1;
+            });
+            di2.factory(t, function () {
+                return result2;
+            });
+            di3.factory(t, function () {
+                return result3;
+            });
+
+            expect(di1.get(t)).toBe(result1);
+            expect(di2.get(t)).toBe(result2);
+            expect(di3.get(t)).toBe(result3);
+        });
+    });
+
     describe('factory function', function () {
         it('should throw if no name is given', function () {
             expect(di.factory).toThrow();
         });
+
         it('should throw if name is not a string, or if name is empty', function () {
             testValidName(di.factory);
         });
+
         it('should throw if parameter two is not a function, or an array ending with a function', function () {
             expect(function () {
                 di.factory('test', {});
@@ -128,6 +159,7 @@ describe('workular dependency injection (newDI)', function () {
                 di.factory('test', ['pizza']);
             }).toThrow();
         });
+
         it('should throw if array parameter 2 contains non-strings', function () {
             expect(function () {
                 di.factory('test', ['pizza', 5, function () {
@@ -135,6 +167,7 @@ describe('workular dependency injection (newDI)', function () {
                 di.get('pizza');
             }).toThrow();
         });
+
         it('should throw if array parameter 2 contains duplicates', function () {
             expect(function () {
                 di.factory('test', ['pizza', 'pizza', function () {
@@ -142,6 +175,7 @@ describe('workular dependency injection (newDI)', function () {
                 di.get('pizza');
             }).toThrow();
         });
+
         it('given a valid signature it should return a DI object', function () {
             expect(di.factory('test', function () {
             }).isWorkularDI).toBe(true);
@@ -152,6 +186,7 @@ describe('workular dependency injection (newDI)', function () {
             expect(di.factory('test', ['blah', 'blah2', function () {
             }]).isWorkularDI).toBe(true);
         });
+
         it('should throw an error if the module function encounters an error', function () {
             function test() {
                 di.factory('test1', function () {
@@ -161,6 +196,7 @@ describe('workular dependency injection (newDI)', function () {
             }
             expect(test).toThrow();
         });
+
         it('should populate given functions with registered services', function () {
             di.factory('test1', function () {
                 return 'test1';
@@ -178,6 +214,11 @@ describe('workular dependency injection (newDI)', function () {
                 expect(t2).toBe('test2');
                 expect(t3).toBe('test3');
             }]);
+
+            di.get('test1');
+            di.get('test2');
+            di.get('test3');
+            di.get('test4');
         });
     });
 

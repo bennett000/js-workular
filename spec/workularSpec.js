@@ -1,4 +1,4 @@
-/*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
+/*global window, jasmine, beforeEach, describe, expect, spyOn, runs, waitsFor, it, module,inject, workular */
 
 describe('workular core', function () {
     'use strict';
@@ -90,6 +90,42 @@ describe('workular core', function () {
 
         it('should return true given a non empty string', function () {
             expect(workular.isNonEmptyString('some string')).toBe(true);
+        });
+    });
+
+    describe('main method', function () {
+        it('should throw if a non function is provided', function () {
+            var testValues = [
+                null,
+                NaN,
+                {},
+                55,
+                false,
+                true,
+                [],
+                ''
+            ];
+            testValues.forEach(function (val) {
+                expect(function () {
+                    workular.main(val);
+                }).toThrow();
+            });
+        });
+
+        it ('should invoke a given function', function () {
+            var done = false;
+
+            workular.main(function () {
+                done = true;
+            });
+
+            waitsFor(function () {
+                return done;
+            });
+
+            runs(function() {
+                expect(true).toBe(true);
+            });
         });
     });
 });
