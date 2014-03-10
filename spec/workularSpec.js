@@ -1,4 +1,11 @@
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, waitsFor, it, module,inject, workular */
+if (typeof module !== 'undefined' && module.exports) {
+    /*global require */
+    var workular = require('../src/workular.js').workular,
+    global = require('../src/workular.js');
+} else {
+    var global = this;
+}
 
 describe('workular core', function () {
     'use strict';
@@ -21,7 +28,7 @@ describe('workular core', function () {
         });
         it('should provide access to the global object through DI', function () {
             expect(typeof workular.getComponent('global')).toBe('object');
-            expect(workular.getComponent('global')).toBe(window);
+            expect(workular.getComponent('global')).toBe(global);
         });
     });
 

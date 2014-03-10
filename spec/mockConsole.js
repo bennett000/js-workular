@@ -17,3 +17,6 @@ gConsoleFunctions.forEach(function (fn) {
         this[fn + 's'].push(arguments);
     };
 });
+
+// expose
+this.MockConsole = MockConsole;

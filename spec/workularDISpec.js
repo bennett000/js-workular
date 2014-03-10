@@ -5,6 +5,12 @@
 
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
 
+// bootstrap the test if necessary:
+if (typeof module !== 'undefined' && module.exports) {
+    /*global require */
+    var workular = require('../src/workular.js').workular;
+}
+
 
 describe('workular dependency injection (newDI)', function () {
     'use strict';

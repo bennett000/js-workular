@@ -85,7 +85,7 @@
                 {
                     timestamp: Date.now(),
                     nameSpace: nameSpace,
-                    arguments: Array.slice.call(args, 0)
+                    arguments: Array.prototype.slice.call(args, 0)
                 });
         }
 
@@ -379,7 +379,7 @@
             throw new TypeError('workular, expects main function to be a function');
         }
         // start workular on the next turn
-        global.setTimeout(function () {
+        setTimeout(function () {
             try {
                 programEntry();
             } catch (err) {
