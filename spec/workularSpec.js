@@ -2,7 +2,7 @@
 
 /* jasmine specs for controllers go here */
 /* jasmine specs for services go here */
-/*global jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
+/*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
 
 describe('workular core', function () {
     describe('workular', function () {
@@ -19,7 +19,8 @@ describe('workular core', function () {
             expect(typeof workular.newDI).toBe('function');
         });
         it('should provide access to the global object through DI', function () {
-            expect(workular.getModule('global')).toBe(window);
+            expect(typeof workular.getComponent('global')).toBe('object');
+            expect(workular.getComponent('global')).toBe(window);
         });
     });
 });
@@ -66,9 +67,6 @@ describe('dependency injection (newDI)', function () {
         it('should be an object', function () {
             expect(typeof di).toBe('object');
         });
-        it('should provide a module function', function () {
-            expect(typeof di.module).toBe('function');
-        });
         it('should provide a factory function', function () {
             expect(typeof di.factory).toBe('function');
         });
@@ -85,14 +83,17 @@ describe('dependency injection (newDI)', function () {
 
     describe('di should initialize with given values', function () {
         it('should contain the given values from the array', function () {
-            var t1 = workular.newDI(null, [
+            var t1 = workular.newDI([
                 {
+                    nameSpace: 'factory',
                     name: 'five',
                     value: 5
                 }, {
+                    nameSpace: 'factory',
                     name: 'six',
                     value: '6'
                 }, {
+                    nameSpace: 'factory',
                     name: 'seven',
                     value: { value: 7 }
                 }
@@ -102,30 +103,27 @@ describe('dependency injection (newDI)', function () {
             expect(t1.get('seven').value).toBe(7);
         });
         it('should contain the given value', function () {
-            var t1 = workular.newDI(null, {
+            var t1 = workular.newDI({
+                nameSpace: 'factory',
                 name: 'test',
                 value: 'Higgins Rocks!'
-            });
+                                    });
             expect(t1.get('test')).toBe('Higgins Rocks!');
         });
-        it('should ignore malformated inputs', function () {
-            var t1 = workular.newDI(null, NaN),
-                t2 = workular.newDI(null, 'Cheese'),
-                t3 = workular.newDI(null, {
-                    name: 234523,
-                    value: 5
-                });
-            expect(t3.has(234523)).toBe(false);
-        });
-    });
+        it('should throw on truthy malformated inputs', function () {
+            expect(function () {
+                var t2 = workular.newDI('Cheese');
+            }).toThrow();
 
-    describe('module function', function () {
-        it('should return null', function () {
-            expect(di.module()).toBe(null);
-        });
-        it('should return the given object', function () {
-            var blah = {}, diCustom = workular.newDI(blah);
-            expect(diCustom.module()).toBe(blah);
+            expect(function () {
+                var t3 = workular.newDI(
+                    {
+                        nameSpace: 'factory',
+                        name: 234523,
+                        value: 5
+                    });
+            }).toThrow();
+
         });
     });
 
@@ -151,23 +149,25 @@ describe('dependency injection (newDI)', function () {
             expect(function () {
                 di.factory('test', ['pizza', 5, function () {
                 }]);
+                di.get('pizza');
             }).toThrow();
         });
         it('should throw if array parameter 2 contains duplicates', function () {
             expect(function () {
                 di.factory('test', ['pizza', 'pizza', function () {
                 }]);
+                di.get('pizza');
             }).toThrow();
         });
-        it('given a valid signature it should return null', function () {
+        it('given a valid signature it should return workular', function () {
             expect(di.factory('test', function () {
-            })).toBe(null);
+            })).toBe(workular);
             expect(di.factory('test', [function () {
-            }])).toBe(null);
+            }])).toBe(workular);
             expect(di.factory('test', ['blah', function () {
-            }])).toBe(null);
+            }])).toBe(workular);
             expect(di.factory('test', ['blah', 'blah2', function () {
-            }])).toBe(null);
+            }])).toBe(workular);
         });
         it('should throw an error if the module function encounters an error', function () {
             function test() {
