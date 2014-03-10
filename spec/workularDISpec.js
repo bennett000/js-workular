@@ -46,7 +46,7 @@ describe('dependency injection (newDI)', function () {
         di = workular.newDI(null);
     });
 
-    describe("DI API", function () {
+    describe('DI API', function () {
         it('should be an object', function () {
             expect(typeof di).toBe('object');
         });
@@ -95,11 +95,11 @@ describe('dependency injection (newDI)', function () {
         });
         it('should throw on truthy malformated inputs', function () {
             expect(function () {
-                var t2 = workular.newDI('Cheese');
+                workular.newDI('Cheese');
             }).toThrow();
 
             expect(function () {
-                var t3 = workular.newDI(
+                workular.newDI(
                     {
                         nameSpace: 'factory',
                         name: 234523,
@@ -245,7 +245,7 @@ describe('dependency injection (newDI)', function () {
     describe('has function', function () {
         it('should return true if it has a module, and false otherwise', function () {
             di.factory('test1', function () {
-                return "booya";
+                return 'booya';
             });
             di.factory('test2', function () {
                 return 5;
