@@ -1,10 +1,15 @@
-'use strict';
-
-/* jasmine specs for controllers go here */
-/* jasmine specs for services go here */
-/*global jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
+/*global window, jasmine, beforeEach, describe, expect, spyOn, runs, waitsFor, it, module,inject, workular */
+if (typeof module !== 'undefined' && module.exports) {
+    /*global require */
+    var workular = require('../src/workular.js').workular,
+    global = require('../src/workular.js');
+} else {
+    var global = this;
+}
 
 describe('workular core', function () {
+    'use strict';
+
     describe('workular', function () {
         it('should be an object', function () {
             expect(typeof workular).toBe('object');
@@ -18,269 +23,116 @@ describe('workular core', function () {
         it('should provide a newDI function', function () {
             expect(typeof workular.newDI).toBe('function');
         });
+        it('should provide a main function', function () {
+            expect(typeof workular.main).toBe('function');
+        });
         it('should provide access to the global object through DI', function () {
-            expect(workular.getModule('global')).toBe(window);
-        });
-    });
-});
-
-describe('dependency injection (newDI)', function () {
-    // ensures that parameter one is a non empty string
-    function testValidName(fn) {
-        expect(function () {
-            fn(5);
-        }).toThrow();
-        expect(function () {
-            fn({});
-        }).toThrow();
-        expect(function () {
-            fn(NaN);
-        }).toThrow();
-        expect(function () {
-            fn([]);
-        }).toThrow();
-        expect(function () {
-            fn(null);
-        }).toThrow();
-        expect(function () {
-            fn(false);
-        }).toThrow();
-        expect(function () {
-            fn(true);
-        }).toThrow();
-        expect(function () {
-            fn(function () {
-            });
-        }).toThrow();
-        expect(function () {
-            fn('');
-        }).toThrow();
-    }
-    // setup each test with a new di object
-    var di;
-    beforeEach(function () {
-        di = workular.newDI(null);
-    });
-
-    describe("DI API", function () {
-        it('should be an object', function () {
-            expect(typeof di).toBe('object');
-        });
-        it('should provide a module function', function () {
-            expect(typeof di.module).toBe('function');
-        });
-        it('should provide a factory function', function () {
-            expect(typeof di.factory).toBe('function');
-        });
-        it('should provide a getRaw function', function () {
-            expect(typeof di.getRaw).toBe('function');
-        });
-        it('should provide a get function', function () {
-            expect(typeof di.get).toBe('function');
-        });
-        it('should provide a has function', function () {
-            expect(typeof di.has).toBe('function');
+            expect(typeof workular.getComponent('global')).toBe('object');
+            expect(workular.getComponent('global')).toBe(global);
         });
     });
 
-    describe('di should initialize with given values', function () {
-        it('should contain the given values from the array', function () {
-            var t1 = workular.newDI(null, [
-                {
-                    name: 'five',
-                    value: 5
-                }, {
-                    name: 'six',
-                    value: '6'
-                }, {
-                    name: 'seven',
-                    value: { value: 7 }
-                }
-            ]);
-            expect(t1.get('five')).toBe(5);
-            expect(t1.get('six')).toBe('6');
-            expect(t1.get('seven').value).toBe(7);
-        });
-        it('should contain the given value', function () {
-            var t1 = workular.newDI(null, {
-                name: 'test',
-                value: 'Higgins Rocks!'
+    describe('isObject method', function () {
+        var testValues = [
+            null,
+            NaN,
+            function () {},
+            55,
+            false,
+            true,
+            []
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isObject(val)).toBe(false);
             });
-            expect(t1.get('test')).toBe('Higgins Rocks!');
         });
-        it('should ignore malformated inputs', function () {
-            var t1 = workular.newDI(null, NaN),
-                t2 = workular.newDI(null, 'Cheese'),
-                t3 = workular.newDI(null, {
-                    name: 234523,
-                    value: 5
-                });
-            expect(t3.has(234523)).toBe(false);
+
+        it('should return true given an object', function () {
+            expect(workular.isObject({})).toBe(true);
+            expect(workular.isObject(Object.create(null))).toBe(true);
         });
     });
 
-    describe('module function', function () {
-        it('should return null', function () {
-            expect(di.module()).toBe(null);
+    describe('isFunction method', function () {
+        var testValues = [
+            null,
+            NaN,
+            {},
+            55,
+            false,
+            true,
+            []
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isFunction(val)).toBe(false);
+            });
         });
-        it('should return the given object', function () {
-            var blah = {}, diCustom = workular.newDI(blah);
-            expect(diCustom.module()).toBe(blah);
+
+        it('should return true given a function', function () {
+            expect(workular.isFunction(workular.emptyFunction)).toBe(true);
         });
     });
 
-    describe('factory function', function () {
-        it('should throw if no name is given', function () {
-            expect(di.factory).toThrow();
-        });
-        it('should throw if name is not a string, or if name is empty', function () {
-            testValidName(di.factory);
-        });
-        it('should throw if parameter two is not a function, or an array ending with a function', function () {
-            expect(function () {
-                di.factory('test', {});
-            }).toThrow();
-            expect(function () {
-                di.factory('test', []);
-            }).toThrow();
-            expect(function () {
-                di.factory('test', ['pizza']);
-            }).toThrow();
-        });
-        it('should throw if array parameter 2 contains non-strings', function () {
-            expect(function () {
-                di.factory('test', ['pizza', 5, function () {
-                }]);
-            }).toThrow();
-        });
-        it('should throw if array parameter 2 contains duplicates', function () {
-            expect(function () {
-                di.factory('test', ['pizza', 'pizza', function () {
-                }]);
-            }).toThrow();
-        });
-        it('given a valid signature it should return null', function () {
-            expect(di.factory('test', function () {
-            })).toBe(null);
-            expect(di.factory('test', [function () {
-            }])).toBe(null);
-            expect(di.factory('test', ['blah', function () {
-            }])).toBe(null);
-            expect(di.factory('test', ['blah', 'blah2', function () {
-            }])).toBe(null);
-        });
-        it('should throw an error if the module function encounters an error', function () {
-            function test() {
-                di.factory('test1', function () {
-                    throw new Error('test error');
-                });
-            }
-            expect(test).toThrow();
-        });
-        it('should populate given functions with registered services', function () {
-            di.factory('test1', function () {
-                return "test1";
+    describe('isNonEmptyString method', function () {
+        var testValues = [
+            null,
+            NaN,
+            function () {},
+            55,
+            false,
+            true,
+            [],
+            ''
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isNonEmptyString(val)).toBe(false);
             });
-            di.factory('test2', function () {
-                return "test2";
-            });
-            di.factory('test3', ['test1', 'test2', function (t1, t2) {
-                expect(t1).toBe('test1');
-                expect(t2).toBe('test2');
-                return 'test3';
-            }]);
-            di.factory('test4', ['test2', 'test1', 'test3', function (t2, t1, t3) {
-                expect(t1).toBe('test1');
-                expect(t2).toBe('test2');
-                expect(t3).toBe('test3');
-            }]);
+        });
+
+        it('should return true given a non empty string', function () {
+            expect(workular.isNonEmptyString('some string')).toBe(true);
         });
     });
 
-    describe('getRaw function', function () {
-        it('should throw if name is not a string or if name is empty', function () {
-            testValidName(di.getRaw);
+    describe('main method', function () {
+        it('should throw if a non function is provided', function () {
+            var testValues = [
+                null,
+                NaN,
+                {},
+                55,
+                false,
+                true,
+                [],
+                ''
+            ];
+            testValues.forEach(function (val) {
+                expect(function () {
+                    workular.main(val);
+                }).toThrow();
+            });
         });
-        it('should return null if dependency is not registered', function () {
-            expect(di.getRaw('hello')).toBe(null);
-        });
-        it('should return the exact same array as was registered', function () {
-            var testArr1 = [
-                'test1',
-                'test2',
-                function () {
-                    return 5 * 25;
-                }
-            ], testArr2 = [
-                function () {
-                    return 5 * 25;
-                }
-            ], temp;
-            di.factory('test1', testArr1);
-            di.factory('test2', testArr2[0]);
 
-            temp = di.getRaw('test1');
-            temp.forEach(function (el, k) {
-                expect(testArr1[k]).toBe(el);
+        it ('should invoke a given function', function () {
+            var done = false;
+
+            workular.main(function () {
+                done = true;
             });
 
-            temp = di.getRaw('test2');
-            temp.forEach(function (el, k) {
-                expect(testArr2[k]).toBe(el);
+            waitsFor(function () {
+                return done;
             });
-        });
-    });
 
-    describe('get function', function () {
-        it('should throw if name is not a string or if name is empty', function () {
-            testValidName(di.get);
-        });
-        it('should return null if dependency is not registered', function () {
-            expect(di.get('hello')).toBe(null);
-        });
-        it('should return the result of the function that was registered', function () {
-            di.factory('test1', function () {
-                return "booya";
+            runs(function() {
+                expect(true).toBe(true);
             });
-            di.factory('test2', function () {
-                return 5;
-            });
-            di.factory('test3', function () {
-                return {
-                    hello: 'hello'
-                };
-            });
-            expect(di.get('test1')).toBe('booya');
-            expect(di.get('test2')).toBe(5);
-            expect(di.get('test3').hello).toBe('hello');
-        });
-    });
-
-    describe('has function', function () {
-        it('should return true if it has a module, and false otherwise', function () {
-            di.factory('test1', function () {
-                return "booya";
-            });
-            di.factory('test2', function () {
-                return 5;
-            });
-            di.factory('test3', function () {
-                return {
-                    hello: 'hello'
-                };
-            });
-            expect(di.has('test1')).toBe(true);
-            expect(di.has('test2')).toBe(true);
-            expect(di.has('test3')).toBe(true);
-            expect(di.has('test4')).toBe(false);
-            expect(di.has('test5')).toBe(false);
-        });
-        it('should return false when given incorrect parameters', function () {
-            expect(di.has('test1')).toBe(false);
-            expect(di.has(5876)).toBe(false);
-            expect(di.has({})).toBe(false);
-            expect(di.has(NaN)).toBe(false);
-            expect(di.has()).toBe(false);
         });
     });
 });
