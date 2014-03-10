@@ -1,5 +1,5 @@
 /**
- * file: workularLoggerSpec
+ * file: workularListenersSpec
  * Created by michael on 10/03/14
  */
 

@@ -153,7 +153,7 @@
             // clone the dependencies to avoid potential side affects of destructive array operations
             deps[nameSpace][name]      = Object.create(null);
             deps[nameSpace][name].deps = dependencies.map(function (val) { return val; });
-            deps[nameSpace][name].fn   = dependencies.pop();
+            deps[nameSpace][name].fn   = deps[nameSpace][name].deps.pop();
 
             if (typeof deps[nameSpace][name].fn !== 'function') {
                 throw new Error(nameSpace + ' module must be a function');
@@ -181,7 +181,7 @@
          */
         function has(name) {
             if (!isNonEmptyString(name)) {
-                throw new TypeError('workular dependency injector: has function takes a string as a parameter');
+                return false;
             }
             var result = false;
             Object.keys(rawInput).forEach(function (ns) {
@@ -209,7 +209,7 @@
          */
         function invokeComponent(nameSpace, name) {
             try {
-                functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+                return functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
             } catch (err) {
                 throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
             }
@@ -272,14 +272,14 @@
                 }
             });
             if (nameSpace === false) {
-                return false;
+                return null;
             }
             return rawInput[nameSpace][name];
         }
 
         function knows(otherDI) {
             try {
-                if (otherDI.isWorkularDI === 'isWorkularDI') {
+                if (otherDI.isWorkularDI === true) {
                     knownDis.push(otherDI);
                     return true;
                 } else {
@@ -311,7 +311,7 @@
             configurable: false
         });
         Object.defineProperty(di, 'isWorkularDI', {
-            value: 'isWorkularDI',
+            value: true,
             configurable: false
         });
 

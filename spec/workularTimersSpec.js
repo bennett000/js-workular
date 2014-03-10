@@ -1,5 +1,5 @@
 /**
- * file: workularLoggerSpec
+ * file: workularTimersSpec
  * Created by michael on 10/03/14
  */
 
