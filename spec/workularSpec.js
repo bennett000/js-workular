@@ -16,6 +16,9 @@ describe('workular core', function () {
         it('should provide a newDI function', function () {
             expect(typeof workular.newDI).toBe('function');
         });
+        it('should provide a main function', function () {
+            expect(typeof workular.main).toBe('function');
+        });
         it('should provide access to the global object through DI', function () {
             expect(typeof workular.getComponent('global')).toBe('object');
             expect(workular.getComponent('global')).toBe(window);

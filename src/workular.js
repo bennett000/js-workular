@@ -374,6 +374,20 @@
         return di.apply(null, Array.slice.call(arguments, 0));
     }
 
+    function main(programEntry) {
+        if (!isFunction(programEntry)) {
+            throw new TypeError('workular, expects main function to be a function');
+        }
+        // start workular on the next turn
+        global.setTimeout(function () {
+            try {
+                programEntry();
+            } catch (err) {
+                throw new Error('workular failed instantiating main method: ' + err.message);
+            }
+        }, 0);
+    }
+
     function init() {
         // workular di instance
         log = newPreLog();
@@ -384,6 +398,10 @@
         }, {
             nameSpace: 'factory',
             name: 'log',
+            value: log
+        }, {
+            nameSpace: 'factory',
+            name: '$log',
             value: log
         }]);
     }
@@ -438,6 +456,10 @@
         value: function () {},
         configurable: false
     });
+    Object.defineProperty(workular, 'main', {
+        value: main,
+        configurable: false
+    })
 
 
     if (global[nameSpace] !== undefined) {
