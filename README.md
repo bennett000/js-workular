@@ -59,6 +59,26 @@ object. The default name of workular is workular.
 * Node's global is the local module, and not really global! workular defaults to
 module.exports.workular
 
+### How do I use it already?
+
+Assuming workular.js has been included in your environment, you can use it like
+so
+
+    workular.module('myModuleName').factory('versionNumber', function () {
+        // what a boring singleton
+        return '0.1.0';
+    });
+
+The above example creates a module, and adds a factory function to it, which could
+be used like:
+
+    workular.module('myModuleName').factory('versionNumber', function () {
+        // what a boring singleton
+        return '0.1.0';
+    }).factory('versionString', ['versionNumber', function (versionNumber) {
+        // only slightly less boring
+        return 'myModuleName version: ' + versionNumber + ' Copyleft (c) 2014';
+    }]);
 
 
 

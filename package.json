@@ -2,7 +2,12 @@
   "name": "workular",
   "description": "Angular.js style modules/dependency injection system for workers, and node",
   "version": "0.1.0",
+  "repository": {
+    "type": "git",
+    "url": "ssh://dev.higginsregister.com/srv/repo/js-workular.git"
+  },
   "devDependencies": {
-    "jasmine-node": "~1.14.2"
+    "jasmine-node": "~1.14.2",
+    "grunt": "~0.4.3"
   }
 }
