@@ -6,7 +6,7 @@
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
 
 
-describe('dependency injection (newDI)', function () {
+describe('workular dependency injection (newDI)', function () {
     'use strict';
 
     // ensures that parameter one is a non empty string

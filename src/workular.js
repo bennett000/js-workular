@@ -47,12 +47,12 @@
     }
 
     /**
-     * returns true if the value is a non null object
+     * returns true if the value is a non null object (arrays do _not_ count as objects)
      * @param input
      * @returns {boolean}
      */
     function isObject(input) {
-        return typeof input === 'object' && input !== null;
+        return typeof input === 'object' && input !== null && Array.isArray(input) === false;
     }
 
     /**

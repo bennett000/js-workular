@@ -21,4 +21,50 @@ describe('workular core', function () {
             expect(workular.getComponent('global')).toBe(window);
         });
     });
+
+    describe('isObject method', function () {
+        var testValues = [
+            null,
+            NaN,
+            function () {},
+            55,
+            false,
+            true,
+            []
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isObject(val)).toBe(false);
+            });
+        });
+
+        it('should return true given an object', function () {
+            expect(workular.isObject({})).toBe(true);
+            expect(workular.isObject(Object.create(null))).toBe(true);
+        });
+    });
+
+    describe('isNonEmptyString method', function () {
+        var testValues = [
+            null,
+            NaN,
+            function () {},
+            55,
+            false,
+            true,
+            [],
+            ''
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isNonEmptyString(val)).toBe(false);
+            });
+        });
+
+        it('should return true given a non empty string', function () {
+            expect(workular.isNonEmptyString('some string')).toBe(true);
+        });
+    });
 });
