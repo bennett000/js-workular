@@ -1,36 +1,19 @@
-function getMockConsole() {
-    'use strict';
+var gConsoleFunctions = [
+    'log', 'info', 'warn', 'error', 'trace'
+];
 
-    return Object.create(null, {
-        logs: [],
-        infos: [],
-        warns: [],
-        errors: [],
-        traces: [],
-        log: {
-            value: function () {
-                this.logs.push(arguments);
-            }
-        },
-        info: {
-            value: function () {
-                this.infos.push(arguments);
-            }
-        },
-        warn: {
-            value: function () {
-                this.warns.push(arguments);
-            }
-        },
-        error: {
-            value: function () {
-                this.errors.push(arguments);
-            }
-        },
-        trace: {
-            value: function () {
-                this.traces.push(arguments);
-            }
-        }
+function MockConsole() {
+    'use strict';
+    var that = this;
+
+    gConsoleFunctions.forEach(function (fn) {
+        that[fn + 's'] = [];
     });
-};
+}
+
+gConsoleFunctions.forEach(function (fn) {
+    'use strict';
+    MockConsole.prototype[fn] = function loggerFn() {
+        this[fn + 's'].push(arguments);
+    };
+});

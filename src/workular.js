@@ -95,15 +95,18 @@
          * @param newLogObj
          */
         function upgrade(newLogObj) {
-            // upgrade the object
-            Object.keys(newLogObj).forEach(function (method) {
-                rObj[method] = newLogObj[method];
-            });
+            // upgrade the object (we want the prototype)
+            for (var i in newLogObj) {
+                rObj[i] = newLogObj[i];
+            }
 
             // sort, then output the buffer
             logs.sort(sortBy('timestamp', false, parseInt)).forEach(function (logParams) {
                 rObj[logParams.nameSpace].apply(rObj, logParams['arguments']);
             });
+
+            // delete old logs
+            logs = null;
         }
 
         /** builds the logger */
