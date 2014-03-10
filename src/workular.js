@@ -221,7 +221,8 @@
          */
         function invokeComponent(nameSpace, name) {
             try {
-                return functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+                functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+                return functions[nameSpace][name];
             } catch (err) {
                 throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
             }
