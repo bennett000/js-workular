@@ -45,6 +45,28 @@ describe('workular core', function () {
         });
     });
 
+    describe('isFunction method', function () {
+        var testValues = [
+            null,
+            NaN,
+            {},
+            55,
+            false,
+            true,
+            []
+        ];
+
+        testValues.forEach(function (val) {
+            it('should return false given ' + val, function () {
+                expect(workular.isFunction(val)).toBe(false);
+            });
+        });
+
+        it('should return true given a function', function () {
+            expect(workular.isFunction(workular.emptyFunction)).toBe(true);
+        });
+    });
+
     describe('isNonEmptyString method', function () {
         var testValues = [
             null,

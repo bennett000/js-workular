@@ -48,11 +48,20 @@
 
     /**
      * returns true if the value is a non null object (arrays do _not_ count as objects)
-     * @param input
+     * @param input {*}
      * @returns {boolean}
      */
     function isObject(input) {
         return typeof input === 'object' && input !== null && Array.isArray(input) === false;
+    }
+
+    /**
+     * returns true if input is a function
+     * @param input {*}
+     * @returns {boolean}
+     */
+    function isFunction(input) {
+        return typeof input === 'function';
     }
 
     /**
@@ -416,6 +425,10 @@
     });
     Object.defineProperty(workular, 'isObject', {
         value: isObject,
+        configurable: false
+    });
+    Object.defineProperty(workular, 'isFunction', {
+        value: isFunction,
         configurable: false
     });
     Object.defineProperty(workular, 'emptyFunction', {
