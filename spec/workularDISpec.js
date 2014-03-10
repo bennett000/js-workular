@@ -139,6 +139,27 @@ describe('workular dependency injection (newDI)', function () {
         });
     });
 
+    describe('Component Order Should Not Be Relevant', function () {
+        it('should be able to invoke modules that have been registered out of order', function () {
+            di.factory('a', ['b', function (b) {
+                    return 'Aa' + ' ' + b;
+                }]).factory('b', ['c', 'd', function (c, d) {
+                    return 'Bb' + ' ' + c + ' ' + d;
+                }]).factory('c', [function () {
+                    return 'Cc';
+                }]);
+            di.factory('d',function () {
+                return 'Dd';
+            }).factory('e', ['d', function (d) {
+                    return d + ' ' + 'Ee';
+                }]);
+
+            expect(di.get('a')).toBe('Aa Bb Cc Dd');
+            expect(di.get('e')).toBe('Dd Ee');
+            expect(di.get('d')).toBe('Dd');
+        });
+    });
+
     describe('factory function', function () {
         it('should throw if no name is given', function () {
             expect(di.factory).toThrow();
