@@ -6,7 +6,7 @@
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
 
 // bootstrap the test if necessary:
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && module.exports && typeof process !== 'undefined') {
     /*global require */
     var workular = require('../src/workular.js').workular;
 }
