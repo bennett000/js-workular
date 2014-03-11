@@ -154,6 +154,7 @@ describe('workular dependency injection (newDI)', function () {
                 }]).factory('c', [function () {
                     return 'Cc';
                 }]);
+
             di.factory('d',function () {
                 return 'Dd';
             }).factory('e', ['d', function (d) {

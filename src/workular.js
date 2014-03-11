@@ -460,7 +460,7 @@
     Object.defineProperty(workular, 'main', {
         value: main,
         configurable: false
-    })
+    });
 
 
     if (global[nameSpace] !== undefined) {
