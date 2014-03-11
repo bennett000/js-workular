@@ -278,14 +278,26 @@
             if (!isNonEmptyString(name)) {
                 throw new TypeError('workular dependency injector: get function takes a string as a parameter');
             }
-            var nameSpace = false;
+            var nameSpace = false, result;
             Object.keys(rawInput).forEach(function (ns) {
                 if (rawInput[ns][name] !== undefined) {
                     nameSpace = ns;
                 }
             });
             if (nameSpace === false) {
-                return null;
+                result = null;
+                knownDis.forEach(function (aDI) {
+                    var localResult;
+                    try {
+                        localResult = aDI.getRaw(name);
+                        if (localResult) { result = localResult; }
+                    } catch (err) {
+                        // fail over
+                    }
+                });
+
+                // return from other DI
+                return result;
             }
             return rawInput[nameSpace][name];
         }

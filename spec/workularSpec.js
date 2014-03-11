@@ -135,4 +135,26 @@ describe('workular core', function () {
             });
         });
     });
+
+    describe('getComponent method', function () {
+        it('should support multiple namespaces through the \'module\' interface', function () {
+            workular.module('test1').factory('testFactory1', function () { return 'test1'; });
+            workular.module('test2').factory('testFactory2', function () { return 'test2'; });
+
+            expect(workular.getComponent('testFactory1')).toBe('test1');
+            expect(workular.getComponent('testFactory2')).toBe('test2');
+        });
+    });
+    describe('getComponentRaw method', function () {
+        it('should support multiple namespaces through the \'module\' interface', function () {
+            var test1 = function () { return 'test1'; },
+            test2 = [function () { return 'test2'; }];
+
+            workular.module('test1').factory('testFactory1', test1);
+            workular.module('test2').factory('testFactory2', test2);
+
+            expect(workular.getComponentRaw('testFactory1').toString()).toBe(test1.toString());
+            expect(workular.getComponentRaw('testFactory2').toString()).toBe(test2.toString());
+        });
+    });
 });

@@ -251,6 +251,10 @@ describe('workular dependency injection (newDI)', function () {
     });
 
     describe('getRaw function', function () {
+        var di2;
+        beforeEach(function () {
+            di2 = workular.newDI();
+        });
         it('should throw if name is not a string or if name is empty', function () {
             testValidName(di.getRaw);
         });
