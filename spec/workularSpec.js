@@ -145,6 +145,7 @@ describe('workular core', function () {
             expect(workular.getComponent('testFactory2')).toBe('test2');
         });
     });
+
     describe('getComponentRaw method', function () {
         it('should support multiple namespaces through the \'module\' interface', function () {
             var test1 = function () { return 'test1'; },
