@@ -65,6 +65,30 @@
     }
 
     /**
+     * determines if the JS environment is node.js
+     * @returns {boolean}
+     */
+    function isNodeJS() {
+        return ((typeof process !== 'undefined') && (typeof require !== 'undefined') && (typeof module !== 'undefined'));
+    }
+
+    /**
+     * determines if the JS environment is a web worker
+     * @returns {boolean}
+     */
+    function isWorker() {
+        return ((typeof self !== 'undefined') && (typeof navigator !== 'undefined'));
+    }
+
+    /**
+     * determines if the JS environment is a web browser
+     * @returns {boolean}
+     */
+    function isBrowser() {
+        return ((typeof window !== 'undefined') && (typeof document !== 'undefined'));
+    }
+
+    /**
      * Stores logs until a 'real' logger is added to the system
      * @returns {*}
      */
@@ -216,6 +240,22 @@
         }
 
         /**
+         * Attempts to use commonjs to invoke a component
+         * @param moduleName {string}
+         * @returns {*}
+         */
+        function tryCommonInvoke(moduleName) {
+            /*global require*/
+            try {
+                return require(moduleName);
+            } catch (err) {
+                throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
+            }
+        }
+
+        /**
+         * Invokes a component function, throws an error if there's a problem
+         * This should automagically try and invoke commonjs modules
          * @param nameSpace {string}
          * @param name {string}
          */
@@ -224,7 +264,11 @@
                 functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
                 return functions[nameSpace][name];
             } catch (err) {
-                throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
+                // looks like we do not have the component loaded.  Try commonjs if it seems like node exists
+                if (!isNodeJS()) {
+                    throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
+                }
+                return tryCommonInvoke(name);
             }
         }
 
@@ -384,7 +428,7 @@
     }
 
     function factory() {
-        return di.apply(null, Array.slice.call(arguments, 0));
+        return di.apply(null, Array.prototype.slice.call(arguments, 0));
     }
 
     function main(programEntry) {
@@ -463,6 +507,18 @@
     });
     Object.defineProperty(workular, 'isFunction', {
         value: isFunction,
+        configurable: false
+    });
+    Object.defineProperty(workular, 'isNodeJS', {
+        value: isNodeJS,
+        configurable: false
+    });
+    Object.defineProperty(workular, 'isWorker', {
+        value: isWorker,
+        configurable: false
+    });
+    Object.defineProperty(workular, 'isBrowser', {
+        value: isBrowser,
         configurable: false
     });
     Object.defineProperty(workular, 'emptyFunction', {
