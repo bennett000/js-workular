@@ -431,6 +431,7 @@
         if (!isFunction(programEntry)) {
             throw new TypeError('workular, expects main function to be a function');
         }
+        /*global setTimeout*/
         // start workular on the next turn
         setTimeout(function () {
             try {
