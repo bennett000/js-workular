@@ -1,7 +1,8 @@
 {
   "name": "workular",
   "description": "Angular.js style modules/dependency injection system for workers, and node",
-  "version": "0.2.0",
+  "version": "0.3.1",
+  "private": true,
   "repository": {
     "type": "git",
     "url": "ssh://dev.higginsregister.com/srv/repo/js-workular.git"
