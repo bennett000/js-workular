@@ -20,3 +20,6 @@ tmp
 
 # build folder
 build
+
+# coverage results
+coverage
