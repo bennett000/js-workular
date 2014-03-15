@@ -109,7 +109,6 @@ describe('workular core', function () {
                 55,
                 false,
                 true,
-                [],
                 ''
             ];
             testValues.forEach(function (val) {
@@ -120,9 +119,10 @@ describe('workular core', function () {
         });
 
         it ('should invoke a given function', function () {
-            var done = false;
+            var done = false, testVal;
 
             workular.main(function () {
+                testVal = 5;
                 done = true;
             });
 
@@ -131,7 +131,30 @@ describe('workular core', function () {
             });
 
             runs(function() {
-                expect(true).toBe(true);
+                expect(testVal).toBe(5);
+                done = false;
+            });
+        });
+
+        it ('should have injectable dependenceis', function () {
+            var done = false, p1, p2;
+
+            workular.module('test1').factory('testFactory3', function () { return 'test3'; });
+            workular.module('test2').factory('testFactory4', function () { return 'test4'; });
+
+            workular.main(['testFactory3', 'testFactory4', function (a, b) {
+                p1 = a;
+                p2 = b;
+                done = true;
+            }]);
+
+            waitsFor(function () {
+                return done;
+            });
+
+            runs(function () {
+                expect(p1).toBe('test3');
+                expect(p2).toBe('test4');
             });
         });
     });

@@ -427,15 +427,40 @@
         return di.apply(null, Array.prototype.slice.call(arguments, 0));
     }
 
+    /**
+     * injects, and invokes the main method
+     * @param deps {Array}
+     */
+    function injectMainDependencies(deps) {
+        var main = deps.pop();
+        if (!isFunction(main)) {
+            console.log('typeof main', typeof main);
+            throw new TypeError('workular: expected main method to be a function');
+        }
+        if (!Array.isArray(deps)) {
+            throw new TypeError('workular: expected dependencies to be an Array');
+        }
+        deps = deps.map(function (dep) {
+            return di.get(dep);
+        });
+        main.apply(null, deps);
+    }
+
+
     function main(programEntry) {
-        if (!isFunction(programEntry)) {
-            throw new TypeError('workular, expects main function to be a function');
+        if ((!isFunction(programEntry)) && (!Array.isArray(programEntry))) {
+            throw new TypeError('workular, expects main parameter to be a function, or an array');
         }
         /*global setTimeout*/
         // start workular on the next turn
         setTimeout(function () {
             try {
-                programEntry();
+                // no dependency case
+                if (!Array.isArray(programEntry)) {
+                    programEntry();
+                } else {
+                    injectMainDependencies(programEntry);
+                }
             } catch (err) {
                 throw new Error('workular failed instantiating main method: ' + err.message);
             }
