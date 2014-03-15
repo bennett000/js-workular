@@ -350,7 +350,8 @@ describe('workular dependency injection (newDI)', function () {
         describe('test if node.js specific functions work', function () {
             it('should load grunt, which is a commonJS module', function () {
                 var grunt = di.get('grunt');
-                expect (typeof grunt).toBe('function');
+                expect (typeof grunt).toBe('object');
+                expect (typeof grunt.loadNpmTasks).toBe('function');
             });
         });
     }

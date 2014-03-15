@@ -260,16 +260,8 @@
          * @param name {string}
          */
         function invokeComponent(nameSpace, name) {
-            try {
-                functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
-                return functions[nameSpace][name];
-            } catch (err) {
-                // looks like we do not have the component loaded.  Try commonjs if it seems like node exists
-                if (!isNodeJS()) {
-                    throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
-                }
-                return tryCommonInvoke(name);
-            }
+            functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+            return functions[nameSpace][name];
         }
 
         /**
@@ -301,7 +293,11 @@
 
                 // throw if it's not found at all
                 if (result === false) {
-                    throw new RangeError('workular dependency injector: component ' + name + ' not found!');
+                    // looks like we do not have the component.  Try commonjs if it seems like node exists
+                    if (!isNodeJS()) {
+                        throw new RangeError('workular dependency injector: component ' + name + ' not found!');
+                    }
+                    return tryCommonInvoke(name);
                 }
                 // return from other DI
                 return result;
