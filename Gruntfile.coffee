@@ -21,7 +21,8 @@ module.exports = (grunt) ->
         options:
           smarttabs: true
           sub: true
-          src: 'src/workular.js'
+        files:
+          src: 'src/*.js'
 
     uglify:
       build:
