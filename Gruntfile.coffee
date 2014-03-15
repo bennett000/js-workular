@@ -31,12 +31,6 @@ module.exports = (grunt) ->
           'build/worker/workular.min.js': ['src/workular.js']
 
     copy:
-      workular:
-        expand: true
-        flatten: true
-        filter: 'isFile'
-        src: 'src/workular.js'
-        dest: 'build/node/index.js'
       package:
         expand: true
         flatten: true
@@ -50,6 +44,12 @@ module.exports = (grunt) ->
         src: 'README.md'
         dest: 'build/node/'
 
+    concat:
+      workular:
+        src: ['src/workular.js']
+        dest: 'build/node/index.js'
+
+
 
 
 
@@ -57,7 +57,8 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-jshint'
   grunt.loadNpmTasks 'grunt-mkdir'
   grunt.loadNpmTasks 'grunt-contrib-copy'
+  grunt.loadNpmTasks 'grunt-contrib-concat'
 
-  grunt.registerTask('build', ['mkdir','jshint','uglify','copy'])
+  grunt.registerTask('build', ['mkdir','jshint','uglify','copy','concat'])
   grunt.registerTask('default', ['build'])
 
