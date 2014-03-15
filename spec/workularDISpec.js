@@ -6,7 +6,7 @@
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular */
 
 // bootstrap the test if necessary:
-if (typeof module !== 'undefined' && module.exports) {
+if (typeof module !== 'undefined' && module.exports && typeof process !== 'undefined') {
     /*global require */
     var workular = require('../src/workular.js').workular;
 }
@@ -342,4 +342,17 @@ describe('workular dependency injection (newDI)', function () {
             expect(di.has()).toBe(false);
         });
     });
+
+    // node specific tests
+    // these will only run from jasmine node
+    // make sure you've npm installed, and that grunt is loaded
+    if (workular.isNodeJS()) {
+        describe('test if node.js specific functions work', function () {
+            it('should load grunt, which is a commonJS module', function () {
+                var grunt = di.get('grunt');
+                expect (typeof grunt).toBe('object');
+                expect (typeof grunt.loadNpmTasks).toBe('function');
+            });
+        });
+    }
 });
