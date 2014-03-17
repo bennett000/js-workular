@@ -196,7 +196,7 @@
             }
 
             // initialize the function
-            functions[nameSpace][name] = false;
+            functions[nameSpace][name] = null;
 
             return di;
         }
@@ -303,7 +303,7 @@
                 return result;
             }
             // return invocation
-            if (functions[nameSpace][name] === false) {
+            if (functions[nameSpace][name] === null) {
                 return invokeComponent(nameSpace, name);
             }
             // return existing
@@ -424,7 +424,7 @@
     }
 
     function factory() {
-        return di.apply(null, Array.prototype.slice.call(arguments, 0));
+        return di.factory.apply(null, Array.prototype.slice.call(arguments, 0));
     }
 
     /**
@@ -434,7 +434,6 @@
     function injectMainDependencies(deps) {
         var main = deps.pop();
         if (!isFunction(main)) {
-            console.log('typeof main', typeof main);
             throw new TypeError('workular: expected main method to be a function');
         }
         if (!Array.isArray(deps)) {
