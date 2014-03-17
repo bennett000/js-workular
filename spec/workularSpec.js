@@ -139,8 +139,8 @@ describe('workular core', function () {
         it ('should have injectable dependenceis', function () {
             var done = false, p1, p2;
 
-            workular.module('test1').factory('testFactory3', function () { return 'test3'; });
-            workular.module('test2').factory('testFactory4', function () { return 'test4'; });
+            workular.module('test3').factory('testFactory3', function () { return 'test3'; });
+            workular.module('test4').factory('testFactory4', function () { return 'test4'; });
 
             workular.main(['testFactory3', 'testFactory4', function (a, b) {
                 p1 = a;
@@ -179,6 +179,32 @@ describe('workular core', function () {
 
             expect(workular.getComponentRaw('testFactory1').toString()).toBe(test1.toString());
             expect(workular.getComponentRaw('testFactory2').toString()).toBe(test2.toString());
+        });
+    });
+
+    describe('test workular module dependency resolution', function () {
+        it('should allow nested modules to resolve dependencies from the parent dependency injector', function () {
+            var done = false;
+
+            workular.module('test5').factory('testFactory5', function () { return 'test5'; });
+            workular.module('test6').factory('testFactory6', [function () { return 'test6'; }]);
+            workular.module('test7').factory('testFactory7', ['testFactory5', 'testFactory6', function (t5, t6) {
+                expect(t5).toBe('test5');
+                expect(t6).toBe('test6');
+                return 'test7';
+            }]);
+
+            workular.main(['testFactory7', function (t7) {
+                expect(t7).toBe('test7');
+                done = true;
+            }]);
+
+            waitsFor(function () {
+                return done;
+            });
+
+            runs(function () {
+            });
         });
     });
 });
