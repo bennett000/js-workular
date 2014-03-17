@@ -152,6 +152,7 @@
         var functions  = Object.create(null),
             rawInput   = Object.create(null),
             deps       = Object.create(null),
+            parentDI   = null,
             knownDis   = [],
             nameSpaces = [
             'factory'
@@ -235,6 +236,9 @@
          */
         function resolveDeps(nameSpace, name) {
             return deps[nameSpace][name].deps.map(function (dependency) {
+                if (parentDI) {
+                    return parentDI.get(dependency);
+                }
                 return di.get(dependency);
             });
         }
@@ -249,7 +253,7 @@
             try {
                 return require(moduleName);
             } catch (err) {
-                throw new EvalError('workular dependecy injector: error invoking: ' + nameSpace + ': name: ' + err.message);
+                throw new EvalError('workular dependecy injector: error invoking through CommonJS: ' + nameSpace + ': name: ' + err.message);
             }
         }
 
@@ -355,6 +359,20 @@
             }
         }
 
+        function parent(aDI) {
+            if (aDI) {
+                if (aDI.isWorkularDI) {
+                    parentDI = aDI;
+                    return;
+                }
+            }
+            return parentDI;
+        }
+
+        Object.defineProperty(di, 'parent', {
+            value: parent,
+            configurable: false
+        });
         Object.defineProperty(di, 'factory', {
             value: factory,
             configurable: false
@@ -420,6 +438,7 @@
 
         modules[name] = newDependencyInjector();
         di.knows(modules[name]);
+        modules[name].parent(di);
         return modules[name];
     }
 
