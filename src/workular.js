@@ -264,7 +264,11 @@
          * @param name {string}
          */
         function invokeComponent(nameSpace, name) {
-            functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+            try {
+                functions[nameSpace][name] = deps[nameSpace][name].fn.apply(null, resolveDeps(nameSpace, name));
+            } catch (err) {
+                log.error('workular: error invoking component ', name, ' ', err.message);
+            }
             return functions[nameSpace][name];
         }
 
