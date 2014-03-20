@@ -253,7 +253,7 @@
             try {
                 return require(moduleName);
             } catch (err) {
-                throw new EvalError('workular dependecy injector: error invoking through CommonJS: ' + nameSpace + ': name: ' + err.message);
+                throw new EvalError('workular dependecy injector: error invoking through CommonJS: ' + moduleName + ': reason: ' + err.message);
             }
         }
 
