@@ -1,7 +1,9 @@
 // Karma configuration
 // Generated on Tue Feb 04 2014 21:57:25 GMT-0500 (EST)
-
+/*global module*/
 module.exports = function (config) {
+    'use strict';
+
     config.set({
 
         // base path, that will be used to resolve files and exclude
@@ -55,7 +57,7 @@ module.exports = function (config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['Firefox'],
+        browsers: [],
 
 
         // If browser does not capture in given timeout [ms], kill it

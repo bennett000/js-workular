@@ -215,14 +215,14 @@ describe('workular dependency injection (newDI)', function () {
             }]).isWorkularDI).toBe(true);
         });
 
-        it('should throw an error if the module function encounters an error', function () {
+        it('should not throw an error if the module function encounters an error', function () {
             function test() {
                 di.factory('test1', function () {
                     throw new Error('test error');
                 });
                 di.get('test1');
             }
-            expect(test).toThrow();
+            expect(test).not.toThrow();
         });
 
         it('should populate given functions with registered services', function () {
