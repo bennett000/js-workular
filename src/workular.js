@@ -249,8 +249,8 @@
          * @returns {*}
          */
         function tryCommonInvoke(moduleName) {
-            /*global require*/
             try {
+                /*global require*/
                 return require(moduleName);
             } catch (err) {
                 throw new EvalError('workular dependecy injector: error invoking through CommonJS: ' + moduleName + ': reason: ' + err.message);
