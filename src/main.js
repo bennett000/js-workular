@@ -10,14 +10,55 @@
 (function (global, w) {
     'use strict';
 
+    /** @type {boolean} */
+    var isBootstrapped = false,
+    /** @type {workular.Injector} */
+    appInjector,
+    /** @dict */
+    modules = {};
+
     /**
      * @param name {string}
-     * @param deps {Array.<string>}
-     * @return {workular.Module}
+     * @param requires {!Array.<string>=}
+     * @param config {function(...)=}
+     * @return {?workular.Module}
      */
-    function module(name, deps) {
-        return new w.Module(name, deps);
+    function module(name, requires, config) {
+        if (requires === undefined) {
+            if (modules[name]) {
+                return modules[name];
+            } else {
+                return null;
+            }
+        }
+        var m = new w.Module(name, requires);
+        modules[name] = m;
+        if (workular.isFunction(config)) {
+            m.config(config);
+        }
+        return m;
+    }
+
+    function bootstrap(modules, config) {
+        var injector;
+        if (workular.isString(modules)) {
+            modules = [modules];
+        }
+        if (workular.isFunction(modules)) {
+
+        }
+        if ((config) && (config.strictDi)) {
+
+        }
+        // if not already bootstrapped, install
+        if (!isBootstrapped) {
+            isBootstrapped = true;
+            appInjector = injector;
+        }
+        // always return
+        return injector;
     }
 
     w['module'] = module;
+    w['bootstrap'] = bootstrap;
 }(this, workular));

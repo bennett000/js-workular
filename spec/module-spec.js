@@ -9,16 +9,14 @@
 describe('workular Module', function () {
     'use strict';
     /*global workular*/
-    var w = workular,
-        components = ['config', 'value', 'constant', 'factory',
-            'service', 'provider', 'run', 'main'];
+    var w = workular;
 
     it('should be a constructor', function () {
         expect(w.Module() instanceof w.Module).toBe(true);
         expect(new w.Module() instanceof w.Module).toBe(true);
     });
 
-    components.forEach(function (component) {
+    w.componentTypes.forEach(function (component) {
         it('should expose a ' + component + ' component', function () {
             var t = w.Module('test', []);
             expect(typeof t[component]).toBe('function');
@@ -29,6 +27,18 @@ describe('workular Module', function () {
        'name', function () {
         var t = w.Module();
         expect(t.config(function test() {})).toBe(t);
+    });
+
+    it('run should register a run function, _without_ the need for a ' +
+       'name', function () {
+        var t = w.Module();
+        expect(t.run(function test() {})).toBe(t);
+    });
+
+    it('main should register a main function, _without_ the need for a ' +
+       'name', function () {
+        var t = w.Module();
+        expect(t.main(function test() {})).toBe(t);
     });
 
     it('factory should register a factory function', function () {

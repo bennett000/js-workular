@@ -5,16 +5,16 @@
 /*global workular*/
 /**
  * @param name {string}
- * @param deps {Array.<string>}
+ * @param requires {Array.<string>}
  * @return {workular.Module}
  * @constructor
  * @package
  */
-workular.Module = function Module(name, deps) {
+workular.Module = function Module(name, requires) {
     'use strict';
 
     if (!(this instanceof Module)) {
-        return new Module(name, deps);
+        return new Module(name, requires);
     }
 
     /** @type {Object} */
@@ -26,7 +26,7 @@ workular.Module = function Module(name, deps) {
     this['name'] = name + '';
 
     /** @type {Array.<string>} */
-    this['requires'] = deps;
+    this['requires'] = requires;
 
     workular.componentTypes.forEach(function (component) {
         components[component] = {};
@@ -45,6 +45,16 @@ workular.Module.forceTrimString = function forceTrimString(val) {
     return workular.toString(val).trim();
 };
 
+/**
+ * @param val {*}
+ * @returns {boolean}
+ * @private
+ */
+workular.Module.$$isSpecialComponent = function (val) {
+    var specials = ['run', 'main', 'config'];
+
+    return specials.indexOf(val) !== -1;
+};
 
 /**
  * @param components {object}
@@ -63,8 +73,8 @@ function getRegisterComponent(components, component) {
      * @throws
      */
     function registerComponent(name, fnOrArray) {
-        // config is a special case
-        if (component === 'config') {
+        // config, run, and main are special cases
+        if (workular.Module.$$isSpecialComponent(component)) {
             fnOrArray = name;
             name = Date.now().toString(16) + Math.random();
         }

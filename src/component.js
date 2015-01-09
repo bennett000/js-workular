@@ -17,7 +17,8 @@
 workular.Component = function Component(name, fn) {
     'use strict';
 
-    var args;
+    var args,
+    forceStrictDi = workular.forceStrictDi === true ? true : false;
 
     if (!(this instanceof Component)) {
         return new Component(name, fn);
@@ -25,22 +26,21 @@ workular.Component = function Component(name, fn) {
 
     this.validate(name, fn);
 
+    /** Array notation takes presedence for now */
     if (workular.isArray(fn)) {
         args = fn;
         fn = args.pop();
         this.validate(name, fn);
-    } else {
-        args = workular.Component.getArgsFromFn(fn);
+        fn['$inject'] = args;
+    }
+    if (!workular.isArray(fn['$inject'])) {
+        fn['$inject'] = [];
     }
 
     /** @type {string} @private */
     this.name = name;
-    /** @type {string} @private */
-    this.args = args;
     /** @type {function(...)} */
     this.fn = fn;
-    /** @type {*} */
-    this.instantiated = null;
 };
 
 /**
@@ -61,26 +61,3 @@ workular.Component.prototype.validate = function validateComponent(name, fn) {
     }
 };
 
-/**
- * @param fn {function(...)}
- * @return {Array.<string>}
- * @package
- */
-workular.Component.getArgsFromFn = function getArgsFromFn(fn) {
-    'use strict';
-
-    if (!workular.isFunction(fn)) {
-        return [];
-    }
-
-    if (Array.isArray(fn['$inject'])) {
-        return fn['$inject'].map(workular.toString);
-    }
-
-    var fnString = fn.toString(),
-        start = fnString.indexOf('(') + 1,
-        end = fnString.indexOf(')');
-
-    return fnString.substring(start, end).split(',').
-    map(workular.Module.forceTrimString);
-};

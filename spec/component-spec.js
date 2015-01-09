@@ -20,10 +20,10 @@ describe('workular Component Class', function () {
 
     it('should throw if second parameter is not a function, or Array',
        function () {
-        expect(function () {
-            var c = new C('hello');
-        }).toThrow();
-    });
+           expect(function () {
+               var c = new C('hello');
+           }).toThrow();
+       });
 
     it('should throw if second parameter is not a function, or Array, with ' +
        'last, element as function', function () {
@@ -44,36 +44,13 @@ describe('workular Component Class', function () {
         expect(new C('test', n) instanceof C).toBe(true);
     });
 
-    it('should set its arguments value based on the function\'s $inject ' +
+    it('should force fn.$inject to be an array of arguments' +
        'parameter', function () {
         var fn = function testFn() {}, c;
         fn.$inject = ['a', 'hello'];
         c = new C('test', fn);
-        expect(c.args[0]).toBe('a');
-        expect(c.args[1]).toBe('hello');
+        expect(c.fn.$inject[0]).toBe('a');
+        expect(c.fn.$inject[1]).toBe('hello');
     });
 
-    it('should start out not instantiated', function () {
-        var c = new C('test', n);
-        expect(c.instantiated).toBe(null);
-    });
-
-    it('getArgsFromFunction should return an empty array if parameter is a ' +
-       'non function', function () {
-        expect(C.getArgsFromFn().toString()).toBe([].toString());
-    });
-
-    it('getArgsFromFunction should return the second parameter\'s $inject ' +
-       'attribute _if_ second parameter is a function', function () {
-        var t = function () {}, vals = ['a', 52, {}, false];
-        t.$inject = vals;
-        expect(C.getArgsFromFn(t).toString()).toBe(vals.toString());
-    });
-
-    it('getArgsFromFunction should return parsed arguments if no $inject ' +
-       'present', function () {
-        var t = function (hi, hello, howAreYou) { };
-        expect(C.getArgsFromFn(t).toString()).
-        toBe(['hi', 'hello', 'howAreYou'].toString());
-    });
 });
