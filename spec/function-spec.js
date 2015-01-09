@@ -42,7 +42,7 @@ describe('workular functions - bind', function () {
 
     it('bind should run a given function against an object with a given ' +
        'context', function () {
-        var testFn = w.bind({ name: 'test1' }, testObj.getName);
+        var testFn = w.bind({name: 'test1'}, testObj.getName);
         expect(testFn()).toBe('test1');
     });
 
@@ -86,7 +86,7 @@ describe('core simple functions', function () {
     });
 
     it('identity should return the value passed in, even objects', function () {
-        var blah = { 1: 52323, 'say': 'so'};
+        var blah = {1: 52323, 'say': 'so'};
         expect(w.identity(blah)).toBe(blah);
     });
 
@@ -121,4 +121,50 @@ describe('core simple functions', function () {
         expect(w.toNumber('')).toBe(0);
         expect(w.toNumber(0)).toBe(0);
     });
+});
+
+describe('forEach function', function () {
+    /*global workular */
+    var w = workular;
+
+    it('should work on arrays', function () {
+        w.forEach([1, 2, 3, 4, 5], function (el, i) {
+            expect(i + 1).toBe(el);
+        });
+    });
+
+    it('should work on Objects', function () {
+        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
+        w.forEach(test, function (el, i) {
+            expect(el).toBe(test[i]);
+        });
+    });
+
+    it('should bind context on arrays', function () {
+        var test = {};
+        w.forEach([1, 2, 3, 4, 5], function (el, i) {
+            expect(this).toBe(test);
+        }, test);
+    });
+
+    it('should bind context on Objects', function () {
+        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
+        w.forEach(test, function (el, i) {
+            expect(this).toBe(test);
+        }, test);
+    });
+
+    it('should do nothing without a callback', function () {
+        expect(function ( ){
+            w.forEach([1, 2, 3]);
+        }).not.toThrow();
+    });
+
+    it('should do nothing without an array or object', function () {
+        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
+        expect(function ( ){
+            w.forEach(2352, workular.noop);
+        }).not.toThrow();
+    });
+
 });

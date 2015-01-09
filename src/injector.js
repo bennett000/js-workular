@@ -22,11 +22,44 @@ workular.Injector = function Injector(modules) {
     if (!workular.isObject(modules)) {
         throw new TypeError('Injector requires modules dictionary');
     }
+
+    /**
+     * @type {Object.<string, workular.Module>}
+     * @private
+     */
+    this.$$modules = modules;
 };
 
+workular.Injector.prototype.checkDependencies = function checkDependencies() {
+
+};
+
+/**
+ * @param fn {function(...)}
+ * @param strictDi {boolean=}
+ * @returns {Array.<string>}
+ */
 workular.Injector.prototype.annotate = function injectorAnnotate(fn, strictDi) {
+    'use strict';
 
+    strictDi = strictDi === true ? true : false;
+    // double check array
+    fn['$inject'] = workular.isArray(fn['$inject']) ? fn['$inject'] : [];
+
+    // if strict di $inject _must_ already be set through annotations, or
+    // a direct fn.$inject = function functionToRun() {}
+    if (strictDi) {
+        return fn['$inject'].map(workular.toString);
+    }
+    // not in strict mode
+    // if there is an inject array use it
+    if (fn['$inject'].length) {
+        return fn['$inject'].map(workular.toString);
+    }
+    // try function parsing
+    return workular.Injector.getArgsFromFn(fn);
 };
+
 
 workular.Injector.prototype.get = function injectorGet(name, caller) {
 
@@ -56,10 +89,6 @@ workular.Injector.getArgsFromFn = function getArgsFromFn(fn) {
 
     if (!workular.isFunction(fn)) {
         return [];
-    }
-
-    if (Array.isArray(fn['$inject'])) {
-        return fn['$inject'].map(workular.toString);
     }
 
     var fnString = fn.toString(),

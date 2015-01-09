@@ -6,7 +6,7 @@
 /*global workular*/
 /**
  * @param args {Arguments}
- * @returns {Array}
+ * @return {Array}
  */
 workular['argsToArray'] = function argumentsToArray(args) {
     'use strict';
@@ -45,6 +45,40 @@ workular['bind'] = function bindContext(context, fn, args) {
     }
 
     return boundFunction;
+};
+
+/**
+ * @param obj {Array|Object}
+ * @param callback {function(...)}
+ * @param context {Object=}
+ */
+workular['forEach'] = function forEach(obj, callback, context) {
+    'use strict';
+
+    context = workular.isObject(context) ? context : null;
+
+    // invalid
+    if (!workular.isFunction(callback)) {
+        return;
+    }
+
+    // array version
+    if (workular.isArray(obj)) {
+        obj.forEach(function bindForEachContext(el, i) {
+            callback.call(context, el, i, obj);
+        });
+        return;
+    }
+
+    // invalid object
+    if (!workular.isObject(obj)) {
+        return;
+    }
+
+    // object version
+    Object.keys(obj).forEach(function (key) {
+        callback.call(context, obj[key], key, obj);
+    });
 };
 
 /**
