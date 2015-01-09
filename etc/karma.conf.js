@@ -1,7 +1,9 @@
 // Karma configuration
 // Generated on Tue Feb 04 2014 21:57:25 GMT-0500 (EST)
 
-/*global module */
+/*global module, require, __dirname */
+var build = require(__dirname + '/../build.js');
+
 module.exports = function (config) {
     'use strict';
 
@@ -14,18 +16,11 @@ module.exports = function (config) {
                    // frameworks to use
                    frameworks: ['jasmine'],
 
-                   files: [
-                       // lib
-
-                       // lib mocks
-
-                       // source
-                       'src/*.js',
-
+                   files: build.src.concat([
                        // mocks & specs
                        'spec/mock-*.js',
                        'spec/*-spec.js'
-                   ],
+                   ]),
 
                    // list of files to exclude
                    exclude: [
@@ -80,3 +75,4 @@ module.exports = function (config) {
                    }
                });
 };
+

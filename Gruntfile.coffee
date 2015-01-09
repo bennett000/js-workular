@@ -3,6 +3,8 @@
 # Make sure your system has Google's closure compiler
 pathCC = '/usr/local/lib/closure-compiler'
 
+build = require('./build.js');
+
 module.exports = (grunt) ->
 
   grunt.initConfig
@@ -49,7 +51,7 @@ module.exports = (grunt) ->
     'closure-compiler':
       workularWorker:
         closurePath: pathCC
-        js: 'src/*.js'
+        js: build.src
         jsOutputFile: 'build/worker/workular.min.js'
         maxBuffer: 500,
         noreport: true
@@ -58,7 +60,7 @@ module.exports = (grunt) ->
           language_in: 'ECMASCRIPT5_STRICT'
       workularNode:
         closurePath: pathCC
-        js: 'src/*.js'
+        js: build.src
         jsOutputFile: 'build/node/workular.min.js'
         maxBuffer: 500,
         noreport: true
@@ -67,7 +69,7 @@ module.exports = (grunt) ->
           language_in: 'ECMASCRIPT5_STRICT'
       workularBrowser:
         closurePath: pathCC
-        js: 'src/*.js'
+        js: build.src
         jsOutputFile: 'build/browser/workular.min.js'
         maxBuffer: 500,
         noreport: true
