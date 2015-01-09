@@ -20,7 +20,7 @@ module.exports = function (config) {
                        // lib mocks
 
                        // source
-                       'src/workular-next.js',
+                       'src/*.js',
 
                        // mocks & specs
                        'spec/mock-*.js',
