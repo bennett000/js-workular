@@ -53,4 +53,16 @@ describe('workular Module', function () {
         expect(t.factory('name', function test() {})).toBe(t);
         expect(w.log.warn).toHaveBeenCalled();
     });
+
+    it('hasComponent should return null if it does not have the requested ' +
+       'component', function () {
+        var t = w.Module();
+        expect(t.$$hasComponent_('test')).toBe(null);
+    });
+
+    it('hasComponent should return valid constants ', function () {
+        var t = w.Module();
+        t.constant('test', 5);
+        expect(t.$$hasComponent_('test')).toBe(5);
+    });
 });

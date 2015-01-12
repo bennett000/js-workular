@@ -134,7 +134,7 @@ describe('forEach function', function () {
     });
 
     it('should work on Objects', function () {
-        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
+        var test = {a: 1, b: 2, 3: 3, d: 4, 5: 5};
         w.forEach(test, function (el, i) {
             expect(el).toBe(test[i]);
         });
@@ -148,23 +148,101 @@ describe('forEach function', function () {
     });
 
     it('should bind context on Objects', function () {
-        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
+        var test = {a: 1, b: 2, 3: 3, d: 4, 5: 5};
         w.forEach(test, function (el, i) {
             expect(this).toBe(test);
         }, test);
     });
 
     it('should do nothing without a callback', function () {
-        expect(function ( ){
+        expect(function () {
             w.forEach([1, 2, 3]);
         }).not.toThrow();
     });
 
     it('should do nothing without an array or object', function () {
-        var test = { a: 1, b: 2, 3:3, d: 4, 5: 5};
-        expect(function ( ){
+        var test = {a: 1, b: 2, 3: 3, d: 4, 5: 5};
+        expect(function () {
             w.forEach(2352, workular.noop);
         }).not.toThrow();
     });
 
+});
+
+describe('inherits', function () {
+    'use strict';
+    /*global workular*/
+    var w = workular, Child, Parent, GrandParent;
+
+    beforeEach(function () {
+        function ChildConstructor(a, b) {
+            Parent.call(this, a);
+            this.b = b;
+        }
+
+        function ParentConstructor(a) {
+            this.a = a;
+        }
+
+        function GrandParentConstructor(a, b) {
+            if (!a || !b) {
+                throw new TypeError('test');
+            }
+        }
+
+        Child = ChildConstructor;
+        Parent = ParentConstructor;
+        GrandParent = GrandParentConstructor;
+    });
+
+    it('control', function () {
+        expect(new Child() instanceof Parent).toBe(false);
+    });
+
+    it('should do basic inheritance', function () {
+        w.inherits(Child, Parent);
+        expect(new Child() instanceof Parent).toBe(true);
+    });
+
+    it('should do basic inheritance with prototype constructor arguments',
+       function () {
+           expect(function () {
+               w.inherits(Child, GrandParent, ['z', 'x']);
+           }).not.toThrow();
+
+           // control
+           expect(function () {
+               w.inherits(Child, GrandParent);
+           }).toThrow();
+       });
+});
+
+describe('construct', function () {
+    'use strict';
+    /*global workular*/
+    var w = workular;
+
+    function Test(a, b, c) {
+        if (!(this instanceof Test)) {
+            return new Test(a, b, c);
+        }
+        this.a = a || null;
+        this.b = b || null;
+        this.c = c || null;
+    }
+
+    it('should return null if not given a constructor', function () {
+        expect(w.construct(23523)).toBe(null);
+    });
+
+    it('should instantiate classes without arguments', function () {
+        expect(w.construct(Test) instanceof Test).toBe(true);
+    });
+
+    it('should instantiate classes with arguments', function () {
+        expect(w.construct(Test, [1, 2, 3]) instanceof Test).toBe(true);
+        expect(w.construct(Test, [1, 2, 3]).a).toBe(1);
+        expect(w.construct(Test, [1, 2, 3]).b).toBe(2);
+        expect(w.construct(Test, [1, 2, 3]).c).toBe(3);
+    });
 });

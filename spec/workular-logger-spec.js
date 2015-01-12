@@ -15,7 +15,7 @@ describe('workular preLogger', function () {
     var log, mockLog;
     beforeEach(function () {
         //log = workular.newPreLogger();
-        log = new workular.PreLog();
+        log = new workular.PreLog_();
     });
 
     describe('API', function () {
@@ -96,7 +96,7 @@ describe('workular preLogger', function () {
         log.upgrade(mockLog);
 
         // validate
-        expect(log.history.length).toBe(0);
+        expect(log.history_.length).toBe(0);
         //nameSpaces.forEach(function (ns) {
         //    expect(log[ns + 's'].length).toBe(testData[ns].length);
         //});

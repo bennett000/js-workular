@@ -2,13 +2,16 @@
  * file: module.js
  * Created by michael on 08/01/15.
  */
+
+
+
 /*global workular*/
 /**
- * @param name {string}
- * @param requires {Array.<string>}
+ * @param {string} name
+ * @param {Array.<string>} requires
  * @return {workular.Module}
+ * @extends {workular.Object}
  * @constructor
- * @package
  */
 workular.Module = function Module(name, requires) {
     'use strict';
@@ -17,10 +20,14 @@ workular.Module = function Module(name, requires) {
         return new Module(name, requires);
     }
 
-    /** @type {Object} */
-    var components = {},
-    /** @type {Module} */
-    that = this;
+    /** @type {workular.Module} */
+    var that = this;
+
+    /**
+     * Registered components live here
+     * @dict
+     */
+    this.$$components = {};
 
     /** @type {string} */
     this['name'] = name + '';
@@ -28,15 +35,49 @@ workular.Module = function Module(name, requires) {
     /** @type {Array.<string>} */
     this['requires'] = requires;
 
-    workular.componentTypes.forEach(function (component) {
-        components[component] = {};
-        that[component] = that.$$registerComponent(components, component);
+    workular.componentTypes.forEach(function(component) {
+        that.$$components[component] = {};
+        that[component] = that.$$registerComponent(component);
     });
 
 };
 
+workular.inherits(workular.Module, workular.Object);
+
 /**
- * @param val {*}
+ * @param {string} name
+ * @return {?workular.Component}
+ * @private
+ */
+workular.Module.prototype.$$hasComponent_ = function hasComponent(name) {
+    'use strict';
+
+    // get components in the following order
+    // ignore configs/runs/mains
+    //  1. constants
+    //  2. values
+    //  3. providers
+    //  4. factories
+    //  5. services
+    //  6. filters
+
+    if (this.$$components['constant'][name]) {
+        return this.$$components['constant'][name];
+    }
+    if (this.$$components['value'][name]) {
+        return this.$$components['value'][name];
+    }
+    if (this.$$components['provider'][name]) {
+        return this.$$components['provider'][name];
+    }
+    if (this.$$components['factory'][name]) {
+        return this.$$components['factory'][name];
+    }
+    return this.$$components['service'][name] || null;
+};
+
+/**
+ * @param {*} val
  * @return {string}
  */
 workular.Module.forceTrimString = function forceTrimString(val) {
@@ -46,44 +87,28 @@ workular.Module.forceTrimString = function forceTrimString(val) {
 };
 
 /**
- * @param val {*}
- * @returns {boolean}
- * @private
- */
-workular.Module.$$isSpecialComponent = function (val) {
-    var specials = ['run', 'main', 'config'];
-
-    return specials.indexOf(val) !== -1;
-};
-
-/**
- * @param components {object}
- * @param component {string}
+ * @param {string} component
  * @return {function(string, function|Array)}
  */
 workular.Module.prototype.$$registerComponent =
-function getRegisterComponent(components, component) {
+function getRegisterComponent(component) {
     'use strict';
     var that = this;
 
     /**
-     * @param name {string}
-     * @param fnOrArray {function(...)|Array}
+     * @param {string|function(...)|Array} param1
+     * @param {function(...)|Array|*=} param2
      * @return {workular.Module}
      * @throws
      */
-    function registerComponent(name, fnOrArray) {
-        // config, run, and main are special cases
-        if (workular.Module.$$isSpecialComponent(component)) {
-            fnOrArray = name;
-            name = Date.now().toString(16) + Math.random();
-        }
-        if (components[component][name]) {
-            workular.log.warn('workular:', name,
+    function registerComponent(param1, param2) {
+        if (that.$$components[component][param1]) {
+            workular.log.warn('workular:', param1,
                               ' already registered in: ', that.name);
             return that;
         }
-        components[component] = new workular.Component(name, fnOrArray);
+
+        that.$$components[component] = new workular.Component[component](param1, param2, that.name);
 
         return that;
     }

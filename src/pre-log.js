@@ -8,47 +8,47 @@
  * @private
  * @constructor
  */
-workular.PreLog = function PreLog() {
+workular.PreLog_ = function PreLog() {
     'use strict';
 
     /**
      *  @const
      *  @private
      *  */
-    this.methods = ['debug', 'error', 'info', 'log', 'trace', 'warn'];
+    this.methods_ = ['debug', 'error', 'info', 'log', 'trace', 'warn'];
 
     /**
      * @type {Array.<{ method: string, args: Array}>}
      * @private
      */
-    this.history = [];
+    this.history_ = [];
 
-    this.$$build();
+    this.$$build_();
 };
 
 /**
  * @private
  */
-workular.PreLog.prototype.$$build = function build() {
+workular.PreLog_.prototype.$$build_ = function build() {
     'use strict';
 
     var that = this;
 
-    this.methods.forEach(function (method) {
-        that[method] = that.getMethod(method);
+    this.methods_.forEach(function(method) {
+        that[method] = that.getMethod_(method);
     });
 };
 
 /**
- * @param newLogger {{ debug: function(...), error: function(...),
- info: function (...), log: function (...), warn: function(...) }}
+ * @param {{ debug: function(...), error: function(...),
+ info: function (...), log: function (...), warn: function(...) }} newLogger
  * @return {boolean}
  */
-workular.PreLog.prototype.upgrade = function upgrade(newLogger) {
+workular.PreLog_.prototype.upgrade = function upgrade(newLogger) {
     'use strict';
 
     var isValid = true, that = this;
-    this.methods.forEach(function (method) {
+    this.methods_.forEach(function(method) {
         if (!workular.isFunction(newLogger[method])) {
             isValid = false;
         }
@@ -58,38 +58,38 @@ workular.PreLog.prototype.upgrade = function upgrade(newLogger) {
         return false;
     }
 
-    this.methods.forEach(function (method) {
+    this.methods_.forEach(function(method) {
         that[method] = workular.bind(newLogger, newLogger[method]);
     });
 
-    this.history.forEach(function (message) {
+    this.history_.forEach(function(message) {
         that[message.method].apply(that, message.args);
     });
 
-    this.history = [];
+    this.history_ = [];
 };
 
 /**
- * @param method {string}
+ * @param {string} method
  * @return {function(...)}
  * @private
  */
-workular.PreLog.prototype.getMethod = function getMethod(method) {
+workular.PreLog_.prototype.getMethod_ = function getMethod(method) {
     'use strict';
     var that = this;
 
     function doLog() {
-        that.history.push({
-                              args: Array.prototype.slice.call(arguments, 0),
-                              method: method
-                          });
+        that.history_.push({
+                               args: Array.prototype.slice.call(arguments, 0),
+                               method: method
+                           });
     }
 
     return doLog;
 };
 
 /**
- * @type {workular.PreLog|*}
+ * @type {workular.PreLog_|*}
  */
-workular.log = new workular.PreLog();
+workular.log = new workular.PreLog_();
 

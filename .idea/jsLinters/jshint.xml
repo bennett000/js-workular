@@ -8,7 +8,7 @@
     <option es3="false" />
     <option forin="true" />
     <option freeze="true" />
-    <option gcl="false" />
+    <option gcl="true" />
     <option immed="true" />
     <option maxcomplexity="5" />
     <option newcap="true" />

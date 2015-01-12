@@ -10,9 +10,9 @@ module.exports.lib = [];
 
 module.exports.src = [
     'workular.js',
-    'injector.js',
     'functions.js',
     'pre-log.js',
+    'injector.js',
     'component.js',
     'module.js',
     'main.js'

@@ -7,7 +7,7 @@
 /**
  * Namespace for putting the library together
  */
-(function (global, w) {
+(function(global, w) {
     'use strict';
 
     /** @type {boolean} */
@@ -18,9 +18,9 @@
     modules = {};
 
     /**
-     * @param name {string}
-     * @param requires {!Array.<string>=}
-     * @param config {function(...)=}
+     * @param {string} name
+     * @param {!Array.<string>=} requires
+     * @param {function(...)=} config
      * @return {?workular.Module}
      */
     function module(name, requires, config) {

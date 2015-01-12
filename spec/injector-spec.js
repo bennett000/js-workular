@@ -25,30 +25,74 @@ describe('Injector class', function () {
 
     it('annotate strict should return a function\'s $inject array',
        function () {
-           var test = function test(z, x, y, p, r, q, t) {};
+           var test = function test(z, x, y, p, r, q, t) {},
+               i = new I({});
            test.$inject = ['a', 'b', 'c', 5];
-           expect(I.prototype.annotate(test, true).toString()).
+           expect(i.annotate(test, true).toString()).
            toBe(test.$inject.toString());
        });
 
     it('annotate strict should return an array',
        function () {
-           var test = function test() {};
-           expect(I.prototype.annotate(test, true).toString()).
+           var test = function test() {},
+               i = new I({});
+           expect(i.annotate(test, true).toString()).
            toBe([].toString());
        });
 
     it('annotate should prefer fn.$inject to argument parsing', function () {
-        var test = function test(z, r, w, d, e, o, l) {};
+        var test = function test(z, r, w, d, e, o, l) {},
+            i = new I({});
         test.$inject = ['a', 'b', 'c', 5];
-        expect(I.prototype.annotate(test).toString()).
+        expect(i.annotate(test).toString()).
         toBe(test.$inject.toString());
     });
 
     it('annotate should parse functions when all else fails', function () {
-        var test = function test(a, b, c) {};
-        expect(I.prototype.annotate(test).toString()).
+        var test = function test(a, b, c) {},
+            i = new I({});
+        expect(i.annotate(test).toString()).
         toBe(['a', 'b', 'c'].toString());
+    });
+
+    it('iterate component should return if no callback given', function () {
+        var i = new I({});
+        spyOn(workular, 'forEach');
+        expect(i.$$iterateComponent('asdf')).toBeUndefined();
+        expect(workular.forEach).not.toHaveBeenCalled();
+    });
+
+    it('iterate component should return if first parameter not in ' +
+       'workular.componentTypes', function () {
+        var i = new I({});
+        spyOn(workular, 'forEach');
+        expect(i.$$iterateComponent('asdf', w.noop)).toBeUndefined();
+        expect(workular.forEach).not.toHaveBeenCalled();
+    });
+
+    it('iterate component should use the injector\'s context', function () {
+        var i = new I({ testMod: new w.Module('testMod').config(function () {
+
+            })}),
+            isDone = false;
+        i.$$iterateComponent('config', function () {
+            expect(this).toBe(i);
+            isDone = true;
+        });
+        expect(isDone).toBe(true);
+    });
+
+    it('iterate component should work across multiple modules', function () {
+        var i = new I({
+                          testMod1: new w.Module('testMod1').config(w.noop),
+                          testMod2: new w.Module('testMod2').config(w.noop),
+                          testMod3: new w.Module('testMod3').config(w.noop),
+                          testMod4: new w.Module('testMod4').config(w.noop),
+                          testMod5: new w.Module('testMod5').config(w.noop)
+                      }),
+            count = 0;
+        i.$$iterateComponent('config', function () { count += 1; });
+        expect(count).toBe(5);
     });
 });
 

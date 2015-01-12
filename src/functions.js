@@ -5,7 +5,7 @@
 
 /*global workular*/
 /**
- * @param args {Arguments}
+ * @param {Arguments} args
  * @return {Array}
  */
 workular['argsToArray'] = function argumentsToArray(args) {
@@ -15,9 +15,9 @@ workular['argsToArray'] = function argumentsToArray(args) {
 };
 
 /**
- * @param context {*}
- * @param fn {function(...)}
- * @param args {Array|*=}
+ * @param {*} context
+ * @param {function(...)} fn
+ * @param {Array|*=} args
  * @return {*}
  */
 workular['bind'] = function bindContext(context, fn, args) {
@@ -28,7 +28,7 @@ workular['bind'] = function bindContext(context, fn, args) {
 
     if (!Array.isArray(args)) {
         if (args === undefined) {
-            args = []
+            args = [];
         } else {
             args = [args];
         }
@@ -48,9 +48,9 @@ workular['bind'] = function bindContext(context, fn, args) {
 };
 
 /**
- * @param obj {Array|Object}
- * @param callback {function(...)}
- * @param context {Object=}
+ * @param {Array|Object} obj
+ * @param {function(...)} callback
+ * @param {Object=} context
  */
 workular['forEach'] = function forEach(obj, callback, context) {
     'use strict';
@@ -76,13 +76,63 @@ workular['forEach'] = function forEach(obj, callback, context) {
     }
 
     // object version
-    Object.keys(obj).forEach(function (key) {
+    Object.keys(obj).forEach(function(key) {
         callback.call(context, obj[key], key, obj);
     });
 };
 
+
 /**
- * @param val {*}
+ * @param {function} C
+ * @param {Array} args
+ * @return {?Object}
+ */
+workular['construct'] = function applyConstructor(C, args) {
+    'use strict';
+
+    if (!workular.isFunction(C)) {
+        return null;
+    }
+
+    args = workular.isArray(args) ? args : [];
+
+    if (!args.length) {
+        return new C();
+    }
+    /**
+     * Temporary shell class
+     * @return {AbstractLambda}
+     * @constructor
+     */
+    function AbstractLambda() {
+        return C.apply(this, args);
+    }
+    AbstractLambda.prototype = C.prototype;
+
+    return new AbstractLambda();
+};
+
+/**
+ * @param {function()} Child constructor
+ * @param {function()} Parent constructor
+ * @param {Array=} args
+ */
+workular['inherits'] = function inheritFrom(Child, Parent, args) {
+    'use strict';
+    if (!workular.isArray(args)) {
+        args = [];
+    }
+
+    if (args.length) {
+        Child.prototype = workular.construct(Child, args);
+    } else {
+        Child.prototype = new Parent();
+    }
+    Child.prototype.constructor = Child;
+};
+
+/**
+ * @param {*} val
  * @return {*}
  */
 workular['identity'] = function identity(val) {
@@ -92,7 +142,7 @@ workular['identity'] = function identity(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isArray'] = function isArray(val) {
@@ -102,7 +152,7 @@ workular['isArray'] = function isArray(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isDefined'] = function isDefined(val) {
@@ -112,7 +162,7 @@ workular['isDefined'] = function isDefined(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isFunction'] = function isFunction(val) {
@@ -121,6 +171,10 @@ workular['isFunction'] = function isFunction(val) {
     return typeof val === 'function';
 };
 
+/**
+ * @param {*} val
+ * @return {boolean}
+ */
 workular['isNumber'] = function isNumber(val) {
     'use strict';
 
@@ -128,7 +182,7 @@ workular['isNumber'] = function isNumber(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isNaN'] = function isNaN(val) {
@@ -138,7 +192,7 @@ workular['isNaN'] = function isNaN(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isNonEmptyString'] = function isNonEmptyString(val) {
@@ -148,7 +202,7 @@ workular['isNonEmptyString'] = function isNonEmptyString(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular.isString = function isString(val) {
@@ -158,7 +212,7 @@ workular.isString = function isString(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isObject'] = function isObject(val) {
@@ -170,7 +224,7 @@ workular['isObject'] = function isObject(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {boolean}
  */
 workular['isUndefined'] = function isUndefined(val) {
@@ -180,7 +234,7 @@ workular['isUndefined'] = function isUndefined(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {string}
  */
 workular['toString'] = function toString(val) {
@@ -190,7 +244,7 @@ workular['toString'] = function toString(val) {
 };
 
 /**
- * @param val {*}
+ * @param {*} val
  * @return {number}
  */
 workular['toNumber'] = function toNumber(val) {
