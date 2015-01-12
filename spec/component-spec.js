@@ -77,4 +77,22 @@ describe('workular Component Class', function() {
         c = new C('constant', 'testme', [5, 6]);
         expect(c.data.toString()).toBe([5, 6].toString());
     });
+
+    it('should allow for provider objects with a $get function', function() {
+        expect(function () {
+            var c = new C('provider', 'testme', {$get: function() {}});
+        }).not.toThrow();
+    });
+
+    it('should throw if a provider object does not have a $get', function() {
+        expect(function () {
+            var c = new C('provider', 'testme', {});
+        }).toThrow();
+    });
+
+    it('should throw if not an object/function ', function() {
+        expect(function () {
+            var c = new C('provider', 'testme', null);
+        }).toThrow();
+    });
 });

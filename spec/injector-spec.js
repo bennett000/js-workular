@@ -69,7 +69,7 @@ describe('Injector class', function() {
     it('iterate component should return if no callback given', function() {
         var i = new I({});
         spyOn(workular, 'forEach');
-        expect(i.$$iterateComponent('asdf')).toBeUndefined();
+        expect(i.$$iterateComponent_('asdf')).toBeUndefined();
         expect(workular.forEach).not.toHaveBeenCalled();
     });
 
@@ -77,7 +77,7 @@ describe('Injector class', function() {
        'workular.componentTypes', function() {
         var i = new I({});
         spyOn(workular, 'forEach');
-        expect(i.$$iterateComponent('asdf', w.noop)).toBeUndefined();
+        expect(i.$$iterateComponent_('asdf', w.noop)).toBeUndefined();
         expect(workular.forEach).not.toHaveBeenCalled();
     });
 
@@ -88,7 +88,7 @@ describe('Injector class', function() {
                           })
                       }),
             isDone = false;
-        i.$$iterateComponent('config', function() {
+        i.$$iterateComponent_('config', function() {
             expect(this).toBe(i);
             isDone = true;
         });
@@ -104,7 +104,7 @@ describe('Injector class', function() {
                           testMod5: new w.Module('testMod5').config(w.noop)
                       }),
             count = 0;
-        i.$$iterateComponent('config', function() { count += 1; });
+        i.$$iterateComponent_('config', function() { count += 1; });
         expect(count).toBe(5);
     });
 
@@ -153,13 +153,13 @@ describe('args from function', function() {
 
     it('getArgsFromFunction should return an empty array if parameter is a ' +
        'non function', function() {
-        expect(C.getArgsFromFn().toString()).toBe([].toString());
+        expect(C.$$getArgsFromFn().toString()).toBe([].toString());
     });
 
     it('getArgsFromFunction should return parsed arguments if no $inject ' +
        'present', function() {
         var t = function(hi, hello, howAreYou) { };
-        expect(C.getArgsFromFn(t).toString()).
+        expect(C.$$getArgsFromFn(t).toString()).
         toBe(['hi', 'hello', 'howAreYou'].toString());
     });
 });

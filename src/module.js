@@ -98,7 +98,7 @@ workular.Module.prototype.$$tryComponent_ =
 function tryComponent(name, param1, param2) {
     'use strict';
     try {
-        return new workular.Component(name, param1, param2);
+        return new workular.Component(name, param1, param2, this.name);
     } catch (err) {
         workular.log.error(err.message);
         throw err;

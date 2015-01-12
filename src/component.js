@@ -74,19 +74,82 @@ workular.Component.prototype.$$setName_ = function setName(type, name, data) {
 workular.Component.prototype.$$setFn_ = function setFn(type, fnOrArray) {
     'use strict';
 
-    if (workular.isArray(fnOrArray)) {
-        this.fn = fnOrArray.pop();
-        this.fn['$inject'] = fnOrArray;
-    } else {
-        this.fn = fnOrArray;
-        if (!workular.isArray(this.fn['$inject'])) {
-            this.fn['$inject]'] = [];
-        }
-    }
+    this.fn = this.$$functionOrArray_(fnOrArray);
 
     if (!workular.isFunction(this.fn)) {
         throw new TypeError(type + ': requires a function');
     }
+};
+
+/**
+ * @param {function(...)|Array} fnOrArray
+ * @return {?function(...)}
+ * @private
+ */
+workular.Component.prototype.$$functionOrArray_ =
+function functionOrArray(fnOrArray) {
+    'use strict';
+    /** @type {?function(...)} */
+    var fn,
+    /** @type Array.<string> */
+    array;
+
+    if (workular.isArray(fnOrArray)) {
+        // make a *copy* of the array
+        array = fnOrArray.map(workular.identity);
+        fn = array.pop();
+        fn['$inject'] = array;
+    } else {
+        fn = fnOrArray;
+    }
+
+    if (!workular.isFunction(fn)) {
+        return null;
+    }
+
+    if (!workular.isArray(fn['$inject'])) {
+        fn['$inject'] = [];
+    }
+
+    return fn;
+};
+
+/**
+ * @param {Object} provider
+ * @private
+ */
+workular.Component.prototype.$$validateProviderObject_ =
+function validateProviderObject(provider) {
+    'use strict';
+
+    if (!workular.isObject(provider)) {
+        throw new TypeError('Provider ' + this.name + ' must provide an ' +
+                            'object, or a function');
+    }
+
+    if (!this.$$functionOrArray_(provider['$get'])) {
+        throw new TypeError('Provider ' + this.name + ' must provide a ' +
+                            '$get method');
+    }
+
+
+    this.data = provider;
+};
+
+/**
+ * @param {Object} fnOrObjectOrArray
+ * @private
+ */
+workular.Component.prototype.$$validateProviderData_ =
+function validateProviderData(fnOrObjectOrArray) {
+    'use strict';
+
+    this.fn = this.$$functionOrArray_(fnOrObjectOrArray);
+    if (workular.isFunction(this.fn)) {
+        return;
+    }
+    this.$$validateProviderObject_(fnOrObjectOrArray);
+
 };
 
 /**
@@ -106,7 +169,9 @@ function validateComponent(type, name, fnOrArrayOrData) {
 
     fnOrArrayOrData = this.$$setName_(type, name, fnOrArrayOrData);
 
-    if (workular.componentsData.indexOf(type) !== -1) {
+    if (type === 'provider') {
+        this.$$validateProviderData_(fnOrArrayOrData);
+    } else if (workular.componentsData.indexOf(type) !== -1) {
         this.data = fnOrArrayOrData;
     } else {
         this.data = null;
