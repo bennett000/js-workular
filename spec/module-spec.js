@@ -65,4 +65,36 @@ describe('workular Module', function () {
         t.constant('test', 5);
         expect(t.$$hasComponent_('test')).toBe(5);
     });
+
+    it('hasComponent should return valid values ', function () {
+        var t = w.Module();
+        t.value('test', 5);
+        expect(t.$$hasComponent_('test')).toBe(5);
+    });
+
+    it('hasComponent should return valid providers ', function () {
+        var t = w.Module();
+        t.provider('test', function () {});
+        expect(t.$$hasComponent_('test')).toBeTruthy();
+    });
+
+    it('hasComponent should return valid services ', function () {
+        var t = w.Module();
+        t.service('test', function () {});
+        expect(t.$$hasComponent_('test')).toBeTruthy();
+    });
+
+    it('hasComponent should return valid factories ', function () {
+        var t = w.Module();
+        t.factory('test', function () {});
+        expect(t.$$hasComponent_('test')).toBeTruthy();
+    });
+
+    it('Components with type errors should throw', function() {
+        var t = w.Module();
+        
+        expect(function() {
+            t.factory(null);
+        }).toThrow();
+    });
 });

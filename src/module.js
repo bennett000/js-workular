@@ -87,6 +87,25 @@ workular.Module.forceTrimString = function forceTrimString(val) {
 };
 
 /**
+ * @param {string} name
+ * @param {string|Array|function(...)} param1
+ * @param {*=} param2
+ * @return {workular.Component}
+ * @throws
+ * @private
+ */
+workular.Module.prototype.$$tryComponent_ =
+function tryComponent(name, param1, param2) {
+    'use strict';
+    try {
+        return new workular.Component(name, param1, param2);
+    } catch (err) {
+        workular.log.error(err.message);
+        throw err;
+    }
+};
+
+/**
  * @param {string} component
  * @return {function(string, function|Array)}
  */
@@ -102,13 +121,14 @@ function getRegisterComponent(component) {
      * @throws
      */
     function registerComponent(param1, param2) {
-        if (that.$$components[component][param1]) {
-            workular.log.warn('workular:', param1,
+        var c = that.$$tryComponent_(component, param1, param2);
+        if (that.$$components[component][c.name]) {
+            workular.log.warn('workular:', c.name,
                               ' already registered in: ', that.name);
             return that;
         }
 
-        that.$$components[component] = new workular.Component[component](param1, param2, that.name);
+        that.$$components[component][c.name] = c;
 
         return that;
     }
