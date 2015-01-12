@@ -55,7 +55,6 @@ workular.Component.prototype.$$setName_ = function setName(type, name, data) {
         data = name;
         name = 'w-' + Date.now().toString(16) + '-' + Math.random();
     }
-    console.log('wha', name, data, type);
 
     if (!workular.isString(name)) {
         throw new TypeError(type + ': first parameter must be string');

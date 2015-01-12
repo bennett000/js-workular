@@ -63,13 +63,13 @@ describe('workular Module', function () {
     it('hasComponent should return valid constants ', function () {
         var t = w.Module();
         t.constant('test', 5);
-        expect(t.$$hasComponent_('test')).toBe(5);
+        expect(t.$$hasComponent_('test')).toBeTruthy();
     });
 
     it('hasComponent should return valid values ', function () {
         var t = w.Module();
         t.value('test', 5);
-        expect(t.$$hasComponent_('test')).toBe(5);
+        expect(t.$$hasComponent_('test')).toBeTruthy();
     });
 
     it('hasComponent should return valid providers ', function () {
