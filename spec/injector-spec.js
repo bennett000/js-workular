@@ -200,30 +200,113 @@ describe('Injector class', function() {
             q: ['log', 'http']
         };
         expect(function() {
-
             var result = I.prototype.$$orderDependencies_(testSet);
         }).toThrow();
     });
 
-    it('$$bootstrapProvider_ should ', function() {
 
-    });
-
-
-    it('$$resolveConfigDependency should instantiate a provider', function() {
+    it('provider functions should run', function() {
         var t = new w.Module('test', []),
             isDone = false,
             i;
-        t.constant('a', 'a').provider('test', function () {
+        t.constant('a', 'a').provider('test', function() {
             isDone = true;
-            this.$get = function () {};
+            this.$get = function() {};
         });
         i = new I({testMod: t});
 
-        i.$$bootstrap_();
-
         expect(isDone).toBe(true);
     });
+
+    it('provider functions should be able to include other providers',
+       function() {
+           var t = new w.Module('test', []),
+               isDone = false,
+               i;
+
+           function P() {
+               isDone = true;
+               this.$get = function() {};
+           }
+
+           t.constant('a', 'a').
+           provider('test', P).
+           provider('test2', function(testProvider) {
+                        isDone = true;
+                        expect(testProvider instanceof P).toBe(true);
+                        this.$get = function() {};
+                    });
+           i = new I({testMod: t});
+
+           expect(isDone).toBe(true);
+       });
+
+    it('provider functions should be able to include constants',
+       function() {
+           var t = new w.Module('test', []),
+               isDone = false,
+               i;
+
+           function P() {
+               isDone = true;
+               this.$get = function() {};
+           }
+
+           t.constant('a', 'a').
+           constant('r', 'rust').
+           provider('test', P).
+           provider('test2', function(testProvider, r) {
+                        isDone = true;
+                        expect(testProvider instanceof P).toBe(true);
+                        expect(r).toBe('rust');
+                        this.$get = function() {};
+                    });
+           i = new I({testMod: t});
+
+           expect(isDone).toBe(true);
+       });
+
+    it('providers with unmet dependencies should throw',
+       function() {
+           var t = new w.Module('test', []),
+               isDone = false,
+               i;
+
+           t.provider('test2', function(r) {
+                        this.$get = function() {};
+                    });
+
+           expect(function () {
+               i = new I({testMod: t});
+           }).toThrow();
+
+       });
+
+    it('config blocks should be able to include providers',
+       function() {
+           var t = new w.Module('test', []),
+               isDone = false,
+               i;
+
+           function P() {
+               isDone = true;
+               this.$get = function() {};
+           }
+
+           t.constant('a', 'a').
+           config(function(testProvider) {
+                      isDone = true;
+                      expect(testProvider instanceof P).toBe(true);
+                  }).
+           provider('test', P).
+           provider('test2', function(testProvider) {
+                        this.$get = function() {};
+                        expect(testProvider instanceof P).toBe(true);
+                    });
+           i = new I({testMod: t});
+
+           expect(isDone).toBe(true);
+       });
 });
 
 describe('args from function', function() {

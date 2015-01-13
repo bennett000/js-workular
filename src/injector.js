@@ -93,6 +93,10 @@ function orderDependencies(hashOfArrays) {
                                 'found: ' + key + ' -> ' + requirement);
             }
             if (checked[requirement]) { return; }
+            if (!hashOfArrays[requirement]) {
+                throw new ReferenceError('workular: Inject: unable to ' +
+                                         'resolve: ' + requirement);
+            }
             hashIterator(hashOfArrays[requirement], requirement);
         });
 
@@ -214,17 +218,6 @@ function bootstrapConstants() {
 /**
  * @private
  */
-workular.Injector.prototype.$$bootstrapConfig_ =
-function bootstrapConfigs() {
-    'use strict';
-
-    this.$$iterateComponent_('config', function(c) {
-    });
-};
-
-/**
- * @private
- */
 workular.Injector.prototype.$$bootstrapValues_ =
 function bootstrapValues() {
     'use strict';
@@ -278,6 +271,21 @@ function getProviderDependencies() {
 };
 
 /**
+ * @param {string} name
+ * @return {*}
+ * @private
+ */
+workular.Injector.prototype.$$mapProviderDependency_ = function(name) {
+    'use strict';
+    if (!name) { return; }
+    if (this.$$providerCache_[name]) {
+        return this.$$providerCache_[name];
+    }
+    var dc = this.$$findComponent_(name);
+    return this.$$componentsCache_[dc.module][dc.type][dc.name];
+};
+
+/**
  * @param {workular.Component} c
  * @return {Object}
  * @private
@@ -289,11 +297,9 @@ function constructProvider(c) {
     var that = this,
         args;
 
+    c.fn['$inject'] = this.annotate(c.fn, this.$$strictDi_);
     args = c.fn['$inject'].map(function(name) {
-        if (that.$$providerCache_[name]) {
-            return that.$$providerCache_[name];
-        }
-        return that.$$findComponent_(name);
+        return that.$$mapProviderDependency_(name);
     });
 
     return workular.construct(c.fn, args);
@@ -360,6 +366,38 @@ function bootstrapProvider(name) {
 };
 
 /**
+ * @param {workular.Component} component
+ * @throws
+ * @private
+ */
+workular.Injector.prototype.$$bootstrapConfigFn_ =
+function bootstrapConfigFn(component) {
+    'use strict';
+    /** @type {number} */
+    var postfixStart,
+    /** @type {Array} */
+    splitName,
+    that = this;
+
+    postfixStart = component.name.indexOf(this.PROVIDER_POSTFIX);
+    if (postfixStart === -1) {
+        return;
+    }
+    splitName = component.name.slice(0, postfixStart);
+
+    if (!workular.isFunction(component.fn)) {
+        throw new ReferenceError('workular: Injector: config component ' +
+                                 'incorrectly setup');
+    }
+    component.fn['$inject'] = this.annotate(component.fn, this.$$strictDi_);
+
+    component.fn.apply(null, component.fn['$inject'].map(function(name) {
+        return that.$$mapProviderDependency_(name);
+    }));
+};
+
+
+/**
  * @private
  */
 workular.Injector.prototype.$$bootstrapProviders_ =
@@ -369,10 +407,22 @@ function bootstrapProviders() {
     // assemble dependency list
     // sort dependency list
     // instantiate/assemble
-    workular.forEach(this.$$orderDependencies_(
-    this.$$getProviderDependencies_()
-    ), this.$$bootstrapProvider_, this);
+    var dependencies = this.$$getProviderDependencies_(),
+        orderedDependencies = this.$$orderDependencies_(dependencies);
+    workular.forEach(orderedDependencies, this.$$bootstrapProvider_, this);
 };
+
+/**
+ * @private
+ */
+workular.Injector.prototype.$$bootstrapConfig_ =
+function bootstrapConfigs() {
+    'use strict';
+
+    // providers all exist, give them out
+    this.$$iterateComponent_('config', this.$$bootstrapConfigFn_);
+};
+
 
 /**
  * @private
