@@ -83,21 +83,21 @@ workular['forEach'] = function forEach(obj, callback, context) {
 
 
 /**
- * @param {function} C
+ * @param {function} Constructor
  * @param {Array} args
  * @return {?Object}
  */
-workular['construct'] = function applyConstructor(C, args) {
+workular['construct'] = function applyConstructor(Constructor, args) {
     'use strict';
 
-    if (!workular.isFunction(C)) {
+    if (!workular.isFunction(Constructor)) {
         return null;
     }
 
     args = workular.isArray(args) ? args : [];
 
     if (!args.length) {
-        return new C();
+        return new Constructor();
     }
     /**
      * Temporary shell class
@@ -105,9 +105,9 @@ workular['construct'] = function applyConstructor(C, args) {
      * @constructor
      */
     function AbstractLambda() {
-        return C.apply(this, args);
+        return Constructor.apply(this, args);
     }
-    AbstractLambda.prototype = C.prototype;
+    AbstractLambda.prototype = Constructor.prototype;
 
     return new AbstractLambda();
 };

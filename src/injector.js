@@ -7,12 +7,13 @@
 
 /**
  * @param {Object.<string, workular.Module>} modules dictionary
+ * @param {boolean=} strictDi
  * @return {workular.Injector}
  * @throws
  * @extends {workular.Object}
  * @constructor
  */
-workular.Injector = function Injector(modules) {
+workular.Injector = function Injector(modules, strictDi) {
     'use strict';
 
     if (!(this instanceof Injector)) {
@@ -21,6 +22,12 @@ workular.Injector = function Injector(modules) {
 
     if (!workular.isObject(modules)) {
         throw new TypeError('Injector requires modules dictionary');
+    }
+
+    /** @type {boolean} @private */
+    this.$$strictDi_ = false;
+    if (strictDi === true) {
+        this.$$strictDi_ = true;
     }
 
     /**
@@ -43,11 +50,6 @@ workular.Injector = function Injector(modules) {
      * @private
      */
     this.$$providerCache_ = {};
-    /**
-     * @type Array.<string>
-     * @private
-     */
-    this.$$dependencyStack_ = [];
 
     // initialize
     this.$$checkDependencies_();
@@ -56,14 +58,59 @@ workular.Injector = function Injector(modules) {
 
 workular.inherits(workular.Injector, workular.Object);
 
+/** @const */
+workular.Injector.prototype.PROVIDER_POSTFIX = 'Provider';
+
+/**
+ * @param {Object.<string, Array.<string>>} hashOfArrays
+ * @throws
+ * @private
+ * @return {Array}
+ */
+workular.Injector.prototype.$$orderDependencies_ =
+function orderDependencies(hashOfArrays) {
+    'use strict';
+    var result = [],
+        checked = {},
+        ancestors = [];
+
+    workular.forEach(hashOfArrays, function hashIterator(row, key) {
+        // skip rows that have already been checked
+        if (checked[key]) { return; }
+        // stack up lineage to check circular dependencies
+        ancestors.push(key);
+        // mark row as checked
+        checked[key] = true;
+
+        // check each requirement too
+        row.forEach(function rowIterator(requirement) {
+            if (!requirement) {
+                // skip falsey values silently
+                return;
+            }
+            if (ancestors.indexOf(requirement) > -1) {
+                throw new Error('workular: Injector: circular dependency ' +
+                                'found: ' + key + ' -> ' + requirement);
+            }
+            if (checked[requirement]) { return; }
+            hashIterator(hashOfArrays[requirement], requirement);
+        });
+
+        // add result, and fix up the stack
+        result.push(key);
+        ancestors.pop();
+    });
+
+    return result;
+};
+
 /**
  * @param {string} component
  * @param {function(...)} callback
- * @param {Object.<string, Object>=} collection
  * @private
  */
 workular.Injector.prototype.$$iterateComponent_ =
-function iterateComponent(component, callback, collection) {
+function iterateComponent(component, callback) {
     'use strict';
 
     if (!workular.isFunction(callback)) {
@@ -74,11 +121,7 @@ function iterateComponent(component, callback, collection) {
         return;
     }
 
-    if (!workular.isObject(collection)) {
-        collection = this.$$modules_;
-    }
-
-    workular.forEach(collection, function(module) {
+    workular.forEach(this.$$modules_, function(module) {
         workular.forEach(module.$$components[component], function(c) {
             callback.call(this, c);
         }, this);
@@ -135,10 +178,6 @@ function checkDependencies() {
         if (!this.$$componentsCache_[name]) {
             this.$$componentsCache_[name] = {};
         }
-        // initialize the provider if not done
-        if (!this.$$providerCache_[name]) {
-            this.$$providerCache_[name] = {};
-        }
     }, this);
 
 };
@@ -154,18 +193,14 @@ function bootstrapData(type) {
     this.$$iterateComponent_(type, function(c) {
         this.$$componentsCache_[c.module] =
         this.$$componentsCache_[c.module] || {};
+
         this.$$componentsCache_[c.module][c.type] =
         this.$$componentsCache_[c.module][c.type] || {};
 
         this.$$componentsCache_[c.module][c.type][c.name] = c.data;
     });
-
-    workular.forEach(this.$$componentsCache_, function(mod) {
-        if (mod[type]) {
-            Object.freeze(mod[type]);
-        }
-    });
 };
+
 /**
  * @private
  */
@@ -197,29 +232,132 @@ function bootstrapValues() {
     this.$$bootstrapData_('constant');
 };
 
+
 /**
- * @param {workular.Component} p
+ * @param {string} a
+ * @return {string}
+ * @private
+ */
+workular.Injector.prototype.$$postFixProvider_ = function postFixProvider(a) {
+    'use strict';
+
+    return a + this.PROVIDER_POSTFIX;
+};
+
+/**
+ * @return {Object.<string, Array.<string>>}
+ * @private
+ */
+workular.Injector.prototype.$$getProviderDependencies_ =
+function getProviderDependencies() {
+    'use strict';
+
+    /** @type {Object.<string, Array.<string>>} */
+    var dependencies = {};
+
+    this.$$iterateComponent_('constant', function(p) {
+        if (dependencies[p.name]) {
+            workular.log.warn('workular: duplicate component name: ', p.name);
+        }
+        dependencies[p.name] = [];
+    });
+
+    this.$$iterateComponent_('provider', function(p) {
+        var providerName = this.$$postFixProvider_(p.name);
+        if (dependencies[providerName]) {
+            workular.log.warn('workular: duplicate component name: ', p.name);
+        }
+        if (p.data) {
+            dependencies[providerName] = [];
+        }
+
+        dependencies[providerName] = this.annotate(p.fn, this.$$strictDi_);
+    });
+
+    return dependencies;
+};
+
+/**
+ * @param {workular.Component} c
+ * @return {Object}
+ * @private
+ */
+workular.Injector.prototype.$$constructProvider_ =
+function constructProvider(c) {
+    'use strict';
+
+    var that = this,
+        args;
+
+    args = c.fn['$inject'].map(function(name) {
+        if (that.$$providerCache_[name]) {
+            return that.$$providerCache_[name];
+        }
+        return that.$$findComponent_(name);
+    });
+
+    return workular.construct(c.fn, args);
+};
+
+/**
+ * @param {{$get: function(...)}} p
+ * @return {function(...)}
+ * @private
+ */
+workular.Injector.prototype.$$validateProvider_ = function validateProvider(p) {
+    'use strict';
+
+    /** @type {?function(...)} */
+    var fn = workular.Component.prototype.$$functionOrArray_(p['$get']);
+
+    if (!workular.isFunction(fn)) {
+        throw new TypeError('workular: Injector: providers must have a ' +
+                            '$get method');
+    }
+
+    return fn;
+};
+
+/**
+ * @param {string} name
  * @throws
  * @private
  */
 workular.Injector.prototype.$$bootstrapProvider_ =
-function bootstrapProvider(p) {
+function bootstrapProvider(name) {
     'use strict';
-    var that = this;
+    /** @type {workular.Component} */
+    var component,
+    /** @type {function(...)} */
+    fn,
+    /** @type {string} */
+    nameFull = name,
+    /** @type {number} */
+    postfixStart;
 
-    if (this.$$dependencyStack_.indexOf(p.module + p.name) !== -1) {
-        throw new Error('workular: Injector: circular dependency detected' +
-                        this.$$dependencyStack_.join(' -> '));
+    postfixStart = name.indexOf(this.PROVIDER_POSTFIX);
+    if (postfixStart === -1) {
+        return;
     }
-    this.$$dependencyStack_.push(p.module + p.name);
+    name = name.slice(0, postfixStart);
+    component = this.$$findComponent_(name);
 
-    p.args.map(function(dependency) {
-        return that.$$resolveConfigDependency_(p, dependency);
-    });
-
-    this.$$dependencyStack_.pop();
+    if (workular.isObject(component.data)) {
+        fn = this.$$validateProvider_(component.data);
+        // store provider
+        this.$$providerCache_[nameFull] = component.data;
+        // register factory function
+        // end
+        return;
+    }
+    if (!workular.isFunction(component.fn)) {
+        throw new ReferenceError('workular: Injector: provider component ' +
+                                 'incorrectly setup');
+    }
+    this.$$providerCache_[nameFull] = this.$$constructProvider_(component);
+    fn = this.$$validateProvider_(this.$$providerCache_[nameFull]);
+    // register factory function
 };
-
 
 /**
  * @private
@@ -228,8 +366,12 @@ workular.Injector.prototype.$$bootstrapProviders_ =
 function bootstrapProviders() {
     'use strict';
 
-    this.$$dependencyStack_ = [];
-    this.$$iterateComponent_('providers', this.$$bootstrapProvider_);
+    // assemble dependency list
+    // sort dependency list
+    // instantiate/assemble
+    workular.forEach(this.$$orderDependencies_(
+    this.$$getProviderDependencies_()
+    ), this.$$bootstrapProvider_, this);
 };
 
 /**
@@ -263,67 +405,6 @@ workular.Injector.prototype.$$bootstrapRun_ =
 function bootstrapRun() {
 
 };
-
-/**
- * @param {workular.Component} nameDependent
- * @param {string} nameRequired
- * @private
- * @throws
- * @return {workular.Component}
- */
-workular.Injector.prototype.$$resolveConfigDependencyValidator_ =
-function validateFindComponent(nameDependent, nameRequired) {
-    'use strict';
-
-    var c = this.$$findComponent_(nameRequired);
-    // component not found
-    if (!c) {
-        throw new TypeError(nameDependent.name + ' requires ' + nameRequired +
-                            'which cannot be found');
-    }
-    // found component is not yet available
-    if ((c.type !== 'constant') || (c.type !== 'provider')) {
-        throw new TypeError(nameDependent.name + ' requires ' + nameRequired +
-                            'which is a ' + c.type + ', and is not available' +
-                            'until after the configuration phase');
-    }
-
-    return c;
-};
-
-/**
- * @param {workular.Component} nameDependent
- * @param {string} nameRequired
- * @private
- * @return {*}
- */
-workular.Injector.prototype.$$resolveConfigDependency_ =
-function resolveConfigDependency(nameDependent, nameRequired) {
-    'use strict';
-
-    var c = this.$$resolveConfigDependencyValidator_(nameDependent,
-                                                     nameRequired);
-
-    if (c.type === 'constant') {
-        return this.$$componentsCache_[c.module][c.type][c.name];
-    }
-    if (this.$$providerCache_[c.module][c.name]) {
-        return this.$$providerCache_[c.module][c.name];
-    }
-    if (c.args.length === 0) {
-
-    }
-};
-
-/**
- * @private
- */
-workular.Injector.prototype.$$resolveRuntimeDependency_ =
-function resolveRuntimeDependency() {
-    'use strict';
-
-};
-
 
 /**
  * @private
@@ -418,9 +499,15 @@ function injectorInvoke(fn, context, locals) {
 
 };
 
+/**
+ * @param {Function} Type
+ * @param {Object=} locals
+ * @return {Object}
+ */
 workular.Injector.prototype['instantiate'] =
 function injectorInstantiate(Type, locals) {
-
+    'use strict';
+    locals = locals || {};
 };
 
 /**

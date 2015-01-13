@@ -142,6 +142,88 @@ describe('Injector class', function() {
                }, i = new I(testMods);
            }).toThrow();
        });
+
+    it('$$bootstrapData should load constants/values', function() {
+        var t = new w.Module('test', []),
+            i;
+        t.constant('a', 'a').constant('b', 'b');
+        i = new I({testMod: t});
+        i.$$bootstrapData_('constant');
+        expect(i.$$componentsCache_['test']['constant']['a']).toBe('a');
+    });
+
+    it('order dependencies (I)', function() {
+        var testSet = {
+                http: ['log', 'queue'],
+                log: [],
+                queue: ['log']
+            },
+            result = I.prototype.$$orderDependencies_(testSet);
+        expect(result.length).toBe(3);
+        expect(result[0]).toBe('log');
+        expect(result[2]).toBe('http');
+    });
+
+    it('order dependencies (II)', function() {
+        var testSet = {
+                http: ['log', 'queue', 'q'],
+                log: [],
+                queue: ['log'],
+                q: ['log', 'queue'],
+                route: ['log', 'q']
+            },
+            result = I.prototype.$$orderDependencies_(testSet);
+        expect(result[0]).toBe('log');
+        expect(result[4]).toBe('route');
+        expect(result.length).toBe(5);
+    });
+
+    it('order dependencies should allow for mutual dependency', function() {
+        var testSet = {
+            http: ['log', 'queue', 'q'],
+            log: [],
+            queue: ['log'],
+            q: ['log'],
+            route: ['queue', 'log', 'http']
+        };
+        expect(function() {
+
+            var result = I.prototype.$$orderDependencies_(testSet);
+        }).not.toThrow();
+    });
+
+    it('order dependencies should throw on circular (I)', function() {
+        var testSet = {
+            http: ['log', 'queue', 'q'],
+            log: [],
+            queue: ['log'],
+            q: ['log', 'http']
+        };
+        expect(function() {
+
+            var result = I.prototype.$$orderDependencies_(testSet);
+        }).toThrow();
+    });
+
+    it('$$bootstrapProvider_ should ', function() {
+
+    });
+
+
+    it('$$resolveConfigDependency should instantiate a provider', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+        t.constant('a', 'a').provider('test', function () {
+            isDone = true;
+            this.$get = function () {};
+        });
+        i = new I({testMod: t});
+
+        i.$$bootstrap_();
+
+        expect(isDone).toBe(true);
+    });
 });
 
 describe('args from function', function() {
