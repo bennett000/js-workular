@@ -44,12 +44,22 @@ workular.Injector = function Injector(modules, strictDi) {
      * @dict
      * @private
      */
-    this.$$componentsCache_ = {};
+    this.$$componentsCache_ = {
+        'auto': workular.module('auto', [])
+    };
+    // seed $provide
+    this.$$componentsCache_['auto']['factory']['$provide'] =
+    this.$$componentsCache_['auto'];
+    // seed $inject
+    this.$$componentsCache_['auto']['factory']['$inject'] = this;
+
     /**
      * @dict
      * @private
      */
     this.$$providerCache_ = {};
+    this.$$providerCache_['$provide'] =
+    this.$$componentsCache_['auto']['factory']['$provide'];
 
     // initialize
     this.$$checkDependencies_();
@@ -325,8 +335,42 @@ workular.Injector.prototype.$$validateProvider_ = function validateProvider(p) {
 };
 
 /**
- * @param {string} name
+ * @param {workular.Component} component
+ * @param {string} nameFull
  * @throws
+ * @private
+ */
+workular.Injector.prototype.$$bootstrapProviderFunction_ =
+function bootstrapProviderFn(component, nameFull) {
+    'use strict';
+
+    if (!workular.isFunction(component.fn)) {
+        throw new ReferenceError('workular: Injector: provider component ' +
+                                 'incorrectly setup');
+    }
+    this.$$providerCache_[nameFull] = this.$$constructProvider_(component);
+    var fn = this.$$validateProvider_(this.$$providerCache_[nameFull]);
+    // register factory function
+    this.$$providerCache_['$provide'].factory(component.name, fn);
+};
+
+/**
+ * @param {workular.Component} component
+ * @param {string} nameFull
+ * @private
+ */
+workular.Injector.prototype.$$bootstrapProviderObject_ =
+function bootstrapProviderObject(component, nameFull) {
+    'use strict';
+    var fn = this.$$validateProvider_(component.data);
+    // store provider
+    this.$$providerCache_[nameFull] = component.data;
+    // register factory function
+    this.$$providerCache_['$provide'].factory(component.name, fn);
+};
+
+/**
+ * @param {string} name
  * @private
  */
 workular.Injector.prototype.$$bootstrapProvider_ =
@@ -334,8 +378,6 @@ function bootstrapProvider(name) {
     'use strict';
     /** @type {workular.Component} */
     var component,
-    /** @type {function(...)} */
-    fn,
     /** @type {string} */
     nameFull = name,
     /** @type {number} */
@@ -349,20 +391,10 @@ function bootstrapProvider(name) {
     component = this.$$findComponent_(name);
 
     if (workular.isObject(component.data)) {
-        fn = this.$$validateProvider_(component.data);
-        // store provider
-        this.$$providerCache_[nameFull] = component.data;
-        // register factory function
-        // end
+        this.$$bootstrapProviderObject_(component, nameFull);
         return;
     }
-    if (!workular.isFunction(component.fn)) {
-        throw new ReferenceError('workular: Injector: provider component ' +
-                                 'incorrectly setup');
-    }
-    this.$$providerCache_[nameFull] = this.$$constructProvider_(component);
-    fn = this.$$validateProvider_(this.$$providerCache_[nameFull]);
-    // register factory function
+    this.$$bootstrapProviderFunction_(component, nameFull);
 };
 
 /**
@@ -373,17 +405,7 @@ function bootstrapProvider(name) {
 workular.Injector.prototype.$$bootstrapConfigFn_ =
 function bootstrapConfigFn(component) {
     'use strict';
-    /** @type {number} */
-    var postfixStart,
-    /** @type {Array} */
-    splitName,
-    that = this;
-
-    postfixStart = component.name.indexOf(this.PROVIDER_POSTFIX);
-    if (postfixStart === -1) {
-        return;
-    }
-    splitName = component.name.slice(0, postfixStart);
+    var that = this;
 
     if (!workular.isFunction(component.fn)) {
         throw new ReferenceError('workular: Injector: config component ' +
@@ -427,30 +449,6 @@ function bootstrapConfigs() {
 /**
  * @private
  */
-workular.Injector.prototype.$$bootstrapProviderGets_ =
-function bootstrapProviderGets() {
-
-};
-
-/**
- * @private
- */
-workular.Injector.prototype.$$bootstrapFactoriesFilters_ =
-function bootstrapFactories() {
-
-};
-
-/**
- * @private
- */
-workular.Injector.prototype.$$bootstrapServices_ =
-function bootstrapServices() {
-
-};
-
-/**
- * @private
- */
 workular.Injector.prototype.$$bootstrapRun_ =
 function bootstrapRun() {
 
@@ -462,14 +460,10 @@ function bootstrapRun() {
 workular.Injector.prototype.$$bootstrap_ =
 function bootstrapInjector() {
     'use strict';
-
     this.$$bootstrapConstants_();
     this.$$bootstrapProviders_();
     this.$$bootstrapConfig_();
     this.$$bootstrapValues_();
-    this.$$bootstrapProviderGets_();
-    this.$$bootstrapFactoriesFilters_();
-    this.$$bootstrapServices_();
     this.$$bootstrapRun_();
 };
 

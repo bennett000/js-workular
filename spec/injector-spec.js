@@ -273,10 +273,10 @@ describe('Injector class', function() {
                i;
 
            t.provider('test2', function(r) {
-                        this.$get = function() {};
-                    });
+               this.$get = function() {};
+           });
 
-           expect(function () {
+           expect(function() {
                i = new I({testMod: t});
            }).toThrow();
 
@@ -307,6 +307,21 @@ describe('Injector class', function() {
 
            expect(isDone).toBe(true);
        });
+
+    it('config blocks should have access to a $provide object', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.config(function($provide) {
+            isDone = true;
+            expect($provide).toBeTruthy();
+            expect(typeof $provide).toBe('object');
+        });
+
+        i = new I({testMod: t});
+        expect(isDone).toBe(true);
+    });
 });
 
 describe('args from function', function() {
