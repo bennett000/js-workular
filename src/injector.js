@@ -248,6 +248,29 @@ workular.Injector.prototype.$$postFixProvider_ = function postFixProvider(a) {
 };
 
 /**
+ * @param {Array.<string>} names
+ * @return {Object.<string, Array.<string>>}
+ * @private
+ */
+workular.Injector.prototype.$$getRuntimeDependencies_ =
+function getRuntimeDependencies(names) {
+    'use strict';
+
+    /** @type {Object.<string, Array.<string>>} */
+    var dependencies = {};
+
+    workular.forEach(names, function(name) {
+        var c = this.$$findComponent_(name);
+        if (!c) {
+            throw new Error('component not found');
+        }
+        dependencies[name] = this.annotate(c.fn, this.$$strictDi_);
+    }, this);
+
+    return dependencies;
+};
+
+/**
  * @return {Object.<string, Array.<string>>}
  * @private
  */
@@ -278,6 +301,31 @@ function getProviderDependencies() {
     });
 
     return dependencies;
+};
+
+/**
+ * @param {string} name
+ * @return {*}
+ * @private
+ */
+workular.Injector.prototype.$$findRuntimeComponent_ =
+function findRuntimeComponent(name) {
+    'use strict';
+    var result;
+
+    workular.forEach(this.$$componentsCache_, function(module) {
+        if (result) { return; }
+        workular.forEach(this.componentsRuntime, function(cName) {
+            if (result) {
+                return;
+            }
+            if (name === module[cName]) {
+                result = module[cName];
+            }
+        }, this);
+    }, this);
+
+    return result;
 };
 
 /**
@@ -451,7 +499,15 @@ function bootstrapConfigs() {
  */
 workular.Injector.prototype.$$bootstrapRun_ =
 function bootstrapRun() {
+    'use strict';
 
+    this.$$iterateComponent_('run', function(c) {
+        this.invoke(this.annotate(c.fn, this.$$strictDi_));
+    }, this);
+
+    this.$$iterateComponent_('main', function(c) {
+        this.invoke(this.annotate(c.fn, this.$$strictDi_));
+    }, this);
 };
 
 /**
@@ -530,17 +586,71 @@ function injectorAnnotate(fn, strictDi) {
 };
 
 
+/**
+ * @param {string} name
+ * @param {string=} caller
+ * @return {*}
+ */
 workular.Injector.prototype['get'] = function injectorGet(name, caller) {
+    'use strict';
 
+    var result = this.$$findRuntimeComponent_(name), c;
+    if (result) {
+        return result;
+    }
+
+    c = this.$$findComponent_(name);
+    if (!c) {
+        // @todo warn?
+        return null;
+    }
+    c.fn['$inject'] = this.annotate(c.fn, this.$$strictDi_);
+
+    if ((c.type === 'factory') || (c.type === 'filter')) {
+        this.$$componentsCache_[c.module][c.type][c.name] = this.invoke(c.fn);
+        result = this.$$componentsCache_[c.module][c.type][c.name];
+    } else if (c.type === 'service') {
+        this.$$componentsCache_[c.module][c.type][c.name] =
+        this.instantiate(c.fn);
+        result = this.$$componentsCache_[c.module][c.type][c.name];
+    } else {
+        throw new Error('workular: Injector: unexpected error');
+    }
+
+    return result;
 };
 
+/**
+ * @param {string} name
+ * @return {boolean}
+ */
 workular.Injector.prototype['has'] = function injectorHas(name) {
+    'use strict';
 
+    return this.$$findComponent_(name) ? true : false;
 };
 
 workular.Injector.prototype['invoke'] =
 function injectorInvoke(fn, context, locals) {
+    'use strict';
 
+    context = context || null;
+    locals = locals || {};
+
+    var dependencies = this.$$getRuntimeDependencies_(fn['$inject']),
+        args = this.$$orderDependencies_(dependencies).
+        map(function(dep) {
+                return this.get(dep);
+            });
+
+    workular.forEach(locals, function(local, key) {
+        var index = fn['$inject'].indexOf(key);
+        if (index > -1) {
+            args[index] = local;
+        }
+    });
+
+    return fn.apply(context, args);
 };
 
 /**
@@ -551,7 +661,23 @@ function injectorInvoke(fn, context, locals) {
 workular.Injector.prototype['instantiate'] =
 function injectorInstantiate(Type, locals) {
     'use strict';
+
     locals = locals || {};
+
+    var dependencies = this.$$getRuntimeDependencies_(Type['$inject']),
+        args = this.$$orderDependencies_(dependencies).
+        map(function(dep) {
+                return this.get(dep);
+            });
+
+    workular.forEach(locals, function(local, key) {
+        var index = Type['$inject'].indexOf(key);
+        if (index > -1) {
+            args[index] = local;
+        }
+    });
+
+    return workular.construct(Type, args);
 };
 
 /**

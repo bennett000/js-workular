@@ -56,6 +56,13 @@ workular.componentsData = [
     'value', 'constant'
 ];
 
+/**
+ * @const
+ */
+workular.componentsRuntime = [
+    'constant', 'value', 'factory', 'service', 'filter'
+];
+
 workular['noop'] = function noop() {};
 workular['emptyFunction'] = workular.noop;
 
