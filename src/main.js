@@ -12,7 +12,7 @@
 workular.$$isBootstrapped = false;
 
 /**
- * @type {Object.<string, Object>}
+ * @type {Object.<string, workular.Module>}
  * */
 workular.$$modules = {};
 
@@ -55,7 +55,7 @@ workular['bootstrap'] = function bootstrap(modules, config) {
 
     // if alrady bootstrapped, skip out
     if (workular.$$isBootstrapped) {
-        return;
+        return workular.$$injector;
     }
 
     config = config || {};
@@ -78,10 +78,10 @@ workular['bootstrap'] = function bootstrap(modules, config) {
         }
     });
 
-    this.$$injector.$$bootstrap();
+    workular.$$injector.$$bootstrap();
 
     // always return
-    return this.$$injector;
+    return workular.$$injector;
 };
 
 /**
