@@ -250,7 +250,7 @@ function getRuntimeComponent(name) {
     'use strict';
 
     var c = this.$$findComponent_(name),
-    dependencies = [];
+        dependencies = [];
     if (!c) {
         throw new Error('component not found: ' + name + ' ' + typeof name);
     }
@@ -721,13 +721,16 @@ function injectorInvoke(fn, context, locals) {
 
     context = context || null;
     locals = locals || {};
+    fn['$inject'] = fn['$inject'] || [];
 
-    var that = this,
-        dependencies = this.$$getRuntimeDependencies_(fn['$inject']),
-        args = this.$$orderDependencies_(dependencies).
-        map(function(dep) {
-                return that.get(dep);
-            });
+    var dependencies = this.$$getRuntimeDependencies_(fn['$inject']),
+        that = this,
+        args;
+
+    // ensure all dependencies are invoked in the right order
+    workular.forEach(this.$$orderDependencies_(dependencies), this.get, this);
+    // map only relevant dependencies
+    args = fn['$inject'].map(function(el) { return that.get(el); });
 
     workular.forEach(locals, function(local, key) {
         var index = fn['$inject'].indexOf(key);
@@ -750,12 +753,16 @@ function injectorInstantiate(Type, locals) {
     'use strict';
 
     locals = locals || {};
+    Type['$inject'] = Type['$inject'] || [];
 
     var dependencies = this.$$getRuntimeDependencies_(Type['$inject']),
-        args = this.$$orderDependencies_(dependencies).
-        map(function(dep) {
-                return this.get(dep);
-            });
+        that = this,
+        args;
+
+    // ensure all dependencies are invoked in the right order
+    workular.forEach(this.$$orderDependencies_(dependencies), this.get, this);
+    // map only relevant dependencies
+    args = Type['$inject'].map(function(el) { return that.get(el); });
 
     workular.forEach(locals, function(local, key) {
         var index = Type['$inject'].indexOf(key);
