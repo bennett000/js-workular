@@ -1,5 +1,5 @@
 var gConsoleFunctions = [
-    'log', 'info', 'warn', 'error', 'trace'
+    'debug', 'error', 'info', 'log', 'trace', 'warn'
 ];
 
 function MockConsole() {

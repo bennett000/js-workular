@@ -6,7 +6,7 @@
 /*global window, jasmine, beforeEach, describe, expect, spyOn, runs, it, module,inject, workular, MockConsole */
 if (typeof module !== 'undefined' && module.exports) {
     /*global require */
-    var MockConsole = require('./mockConsole.js').MockConsole,
+    var MockConsole = require('./mock-console.js').MockConsole,
     workular = require('../src/workular.js').workular;
 }
 
@@ -14,7 +14,8 @@ describe('workular preLogger', function () {
     'use strict';
     var log, mockLog;
     beforeEach(function () {
-        log = workular.newPreLogger();
+        //log = workular.newPreLogger();
+        log = new workular.PreLog_();
     });
 
     describe('API', function () {
@@ -95,9 +96,10 @@ describe('workular preLogger', function () {
         log.upgrade(mockLog);
 
         // validate
-        nameSpaces.forEach(function (ns) {
-            expect(log[ns + 's'].length).toBe(testData[ns].length);
-        });
+        expect(log.history_.length).toBe(0);
+        //nameSpaces.forEach(function (ns) {
+        //    expect(log[ns + 's'].length).toBe(testData[ns].length);
+        //});
     });
 
 });

@@ -8,11 +8,14 @@
     <option es3="false" />
     <option forin="true" />
     <option freeze="true" />
+    <option gcl="true" />
     <option immed="true" />
+    <option maxcomplexity="5" />
     <option newcap="true" />
     <option noarg="true" />
     <option noempty="true" />
     <option nonew="true" />
+    <option noyield="false" />
     <option plusplus="true" />
     <option undef="true" />
     <option strict="true" />
@@ -20,8 +23,8 @@
     <option latedef="true" />
     <option unused="strict" />
     <option quotmark="single" />
-    <option maxdepth="5" />
-    <option maxstatements="30" />
+    <option maxdepth="3" />
+    <option maxstatements="15" />
     <option asi="false" />
     <option boss="false" />
     <option debug="false" />
@@ -38,20 +41,22 @@
     <option loopfunc="false" />
     <option moz="false" />
     <option multistr="false" />
-    <option notypeof="false" />
-    <option proto="false" />
     <option scripturl="false" />
-    <option smarttabs="false" />
     <option shadow="false" />
-    <option sub="false" />
+    <option sub="true" />
     <option supernew="false" />
-    <option validthis="false" />
     <option browser="false" />
     <option couch="false" />
     <option devel="false" />
     <option dojo="false" />
     <option jquery="false" />
+    <option maxlen="80" />
     <option mootools="false" />
+    <option nonbsp="false" />
+    <option notypeof="false" />
+    <option proto="false" />
+    <option smarttabs="false" />
+    <option validthis="false" />
     <option node="false" />
     <option nonstandard="false" />
     <option phantom="false" />
@@ -61,10 +66,9 @@
     <option wsh="false" />
     <option yui="false" />
     <option nomen="false" />
-    <option onevar="false" />
+    <option onevar="true" />
     <option passfail="false" />
     <option white="false" />
     <option maxerr="50" />
   </component>
 </project>
-
