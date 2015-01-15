@@ -23,6 +23,22 @@ describe('Injector class', function() {
         expect(new w.Injector({}) instanceof w.Injector).toBe(true);
     });
 
+    it('$$cc_ should access the components cache', function() {
+        var t = new w.Injector({});
+        expect(t.$$cc_('a', 'b', 'c', 'd')).toBe('d');
+    });
+
+    it('$$cc_ should access the components cache (undefined)', function() {
+        var t = new w.Injector({});
+        expect(t.$$cc_('a', 'b', 'c')).toBe(undefined);
+    });
+
+    it('$$cc_ should access the components cache (access)', function() {
+        var t = new w.Injector({});
+        t.$$cc_('a', 'b', 'c', 5);
+        expect(t.$$cc_('a', 'b', 'c')).toBe(5);
+    });
+
     it('annotate strict should return a function\'s $inject array',
        function() {
            var test = function test(z, x, y, p, r, q, t) {},
@@ -214,6 +230,7 @@ describe('Injector class', function() {
             this.$get = function() {};
         });
         i = new I({testMod: t});
+        i.$$bootstrap();
 
         expect(isDone).toBe(true);
     });
@@ -237,6 +254,7 @@ describe('Injector class', function() {
                         this.$get = function() {};
                     });
            i = new I({testMod: t});
+           i.$$bootstrap();
 
            expect(isDone).toBe(true);
        });
@@ -262,6 +280,7 @@ describe('Injector class', function() {
                         this.$get = function() {};
                     });
            i = new I({testMod: t});
+           i.$$bootstrap();
 
            expect(isDone).toBe(true);
        });
@@ -278,6 +297,7 @@ describe('Injector class', function() {
 
            expect(function() {
                i = new I({testMod: t});
+               i.$$bootstrap();
            }).toThrow();
 
        });
@@ -304,6 +324,7 @@ describe('Injector class', function() {
                         expect(testProvider instanceof P).toBe(true);
                     });
            i = new I({testMod: t});
+           i.$$bootstrap();
 
            expect(isDone).toBe(true);
        });
@@ -320,6 +341,83 @@ describe('Injector class', function() {
         });
 
         i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('run blocks should run immediately', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.run(function() {
+            isDone = true;
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('factory blocks should invoke', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.factory('test', function () {
+            isDone = true;
+        }).run(function(test) {
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('service blocks should instantiate', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.service('test', function TestMe() {
+            expect(this instanceof TestMe).toBe(true);
+            isDone = true;
+        }).run(function(test) {
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('values return (primitive)', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.value('test', 72).run(function(test) {
+            expect(test).toBe(72);
+            isDone = true;
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('values return (object)', function() {
+        var t = new w.Module('test', []),
+            testVal = { boo: 'urns' },
+            isDone = false,
+            i;
+
+        t.value('test', testVal).run(function(test) {
+            expect(JSON.stringify(test)).toBe(JSON.stringify(testVal));
+            isDone = true;
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
         expect(isDone).toBe(true);
     });
 });

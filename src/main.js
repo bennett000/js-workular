@@ -7,58 +7,119 @@
 /**
  * Namespace for putting the library together
  */
-(function(global, w) {
+
+/** @type {boolean} */
+workular.$$isBootstrapped = false;
+
+/**
+ * @type {Object.<string, Object>}
+ * */
+workular.$$modules = {};
+
+/**
+ * @type {?workular.Injector}
+ */
+workular.$$injector = null;
+
+/**
+ * @param {string} name
+ * @param {!Array.<string>=} requires
+ * @param {function(...)=} config
+ * @return {?workular.Module}
+ */
+workular['module'] = function module(name, requires, config) {
     'use strict';
 
-    /** @type {boolean} */
-    var isBootstrapped = false,
-    /** @type {workular.Injector} */
-    appInjector,
-    /** @dict */
-    modules = {};
+    if (requires === undefined) {
+        if (workular.$$modules[name]) {
+            return workular.$$modules[name];
+        } else {
+            return null;
+        }
+    }
+    var m = new workular.Module(name, requires);
+    workular.$$modules[name] = m;
+    if (workular.isFunction(config)) {
+        m.config(config);
+    }
+    return m;
+};
 
-    /**
-     * @param {string} name
-     * @param {!Array.<string>=} requires
-     * @param {function(...)=} config
-     * @return {?workular.Module}
-     */
-    function module(name, requires, config) {
-        if (requires === undefined) {
-            if (modules[name]) {
-                return modules[name];
-            } else {
-                return null;
-            }
-        }
-        var m = new w.Module(name, requires);
-        modules[name] = m;
-        if (workular.isFunction(config)) {
-            m.config(config);
-        }
-        return m;
+/**
+ * @param {Array.<string|function(...)|Array>} modules
+ * @param {{strictDi: boolean}=} config
+ * @return {workular.Injector|*}
+ */
+workular['bootstrap'] = function bootstrap(modules, config) {
+    'use strict';
+
+    // if alrady bootstrapped, skip out
+    if (workular.$$isBootstrapped) {
+        return;
     }
 
-    function bootstrap(modules, config) {
-        var injector;
-        if (workular.isString(modules)) {
-            modules = [modules];
-        }
-        if (workular.isFunction(modules)) {
+    config = config || {};
 
-        }
-        if ((config) && (config.strictDi)) {
+    workular.$$isBootstrapped = true;
+    workular.$$injector = new workular.Injector(workular.$$modules,
+                                                config.strictDi);
 
-        }
-        // if not already bootstrapped, install
-        if (!isBootstrapped) {
-            isBootstrapped = true;
-            appInjector = injector;
-        }
-        // always return
-        return injector;
+    if (!workular.isArray(modules)) {
+        modules = [modules];
     }
 
-    w['module'] = module;
-    w['bootstrap'] = bootstrap;
-}(this, workular));
+    // run any 'kickstart' modules
+    modules.forEach(function(item) {
+        if (workular.isString(item)) {
+            return workular.$$injector.$$auto.run([item, workular.noop]);
+        }
+        if (workular.isFunction(item) || workular.isArray(item)) {
+            return workular.$$injector.$$auto.run(item);
+        }
+    });
+
+    this.$$injector.$$bootstrap();
+
+    // always return
+    return this.$$injector;
+};
+
+/**
+ * @param {Array.<string|Function>} mods
+ * @param {boolean=} strictDi
+ * @return {workular.Injector}
+ */
+workular['injector'] = function newDi(mods, strictDi) {
+    'use strict';
+    var i = new workular.Injector(workular.$$modules, strictDi);
+    i.$$bootstrap();
+    return i;
+};
+
+workular['newDI'] = workular['injector'];
+
+/**
+ * @param {string} name
+ * @return {*}
+ */
+workular['getComponent'] = function getComponent(name) {
+    'use strict';
+
+    var i;
+    if (workular.$$injector) {
+        i = workular.$$injector.get(name);
+        return i;
+    }
+    return null;
+};
+
+workular.module('workular', []).
+factory('global', function() {
+            'use strict';
+
+            // will not work as a value due to workular.copy validation rules
+            return workular.global;
+        }).
+value('log', workular.log).
+value('$log', workular.log);
+

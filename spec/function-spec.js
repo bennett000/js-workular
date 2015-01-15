@@ -246,3 +246,13 @@ describe('construct', function () {
         expect(w.construct(Test, [1, 2, 3]).c).toBe(3);
     });
 });
+
+describe('copy', function() {
+    'use strict';
+    /*global workular*/
+    var w = workular;
+
+    it('should copy primitives', function() {
+        expect(w.copy(5)).toBe(5);
+    });
+});

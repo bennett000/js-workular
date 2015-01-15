@@ -107,6 +107,7 @@ workular['construct'] = function applyConstructor(Constructor, args) {
     function AbstractLambda() {
         return Constructor.apply(this, args);
     }
+
     AbstractLambda.prototype = Constructor.prototype;
 
     return new AbstractLambda();
@@ -252,3 +253,64 @@ workular['toNumber'] = function toNumber(val) {
 
     return +val || 0;
 };
+
+/**
+ * @param {Object} obj
+ * @param {Object=} destination
+ * @return {*}
+ */
+workular.$$copyObject = function copyObject(obj, destination) {
+    'use strict';
+
+    if (!destination) {
+        destination = Object.create(obj);
+    }
+
+    workular.forEach(obj, function(val, key) {
+        destination[key] = workular.copy(val);
+    });
+
+    return destination;
+};
+
+/**
+ * @param {*} source
+ * @param {Object=} destination
+ * @throws
+ * @this {*}
+ */
+workular.$$validateCopy = function validateCopy(source, destination) {
+    'use strict';
+
+    if ((source === workular.global) || (source === this)) {
+        throw new Error('workular cannot copy the global object');
+    }
+    if (destination === undefined) { return; }
+    if (source === destination) {
+        throw new Error('workular cannot copy something to itself');
+    }
+
+};
+
+/**
+ * NOTE THIS FUNCTION IS NOT THE SAME AS angular.copy
+ * @param {*} source
+ * @param {*=} destination
+ * @return {*}
+ */
+workular['copy'] = function copy(source, destination) {
+    'use strict';
+    workular.$$validateCopy(source, destination);
+    if (workular.isObject(source)) {
+        return workular.$$copyObject(source, destination ||
+                                             Object.create(source));
+    }
+
+    if (workular.isArray(source)) {
+        return source.map(function(el) {
+            return workular.copy(el);
+        });
+    }
+    return source;
+};
+
