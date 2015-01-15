@@ -9,7 +9,8 @@
     "workular-debug.js",
     "workular.js",
     "workular.min.js",
-    "workular.min.js.map"
+    "workular.min.js.map",
+    "README.md"
   ],
   "private": true,
   "ignore": [
