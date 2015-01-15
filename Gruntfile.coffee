@@ -37,7 +37,7 @@ module.exports = (grunt) ->
         flatten: true
         filter: 'isFile'
         src: 'README.md'
-        dest: 'build/node/'
+        dest: 'build/browser/'
       bower:
         expand: true
         flatten: true
