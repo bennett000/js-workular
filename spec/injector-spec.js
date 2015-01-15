@@ -79,7 +79,7 @@ describe('Injector class', function() {
         expect(Object.keys(i.$$annotationCache_).length).toBe(1);
         b = i.annotate(test);
         expect(Object.keys(i.$$annotationCache_).length).toBe(1);
-        expect(a).toBe(b);
+        expect(a.toString()).toBe(b.toString());
     });
 
     it('iterate component should return if no callback given', function() {
@@ -364,7 +364,7 @@ describe('Injector class', function() {
             isDone = false,
             i;
 
-        t.factory('test', function () {
+        t.factory('test', function() {
             isDone = true;
         }).run(function(test) {
         });
@@ -407,13 +407,32 @@ describe('Injector class', function() {
 
     it('values return (object)', function() {
         var t = new w.Module('test', []),
-            testVal = { boo: 'urns' },
+            testVal = {boo: 'urns'},
             isDone = false,
             i;
 
         t.value('test', testVal).run(function(test) {
             expect(JSON.stringify(test)).toBe(JSON.stringify(testVal));
             isDone = true;
+        });
+
+        i = new I({testMod: t});
+        i.$$bootstrap();
+        expect(isDone).toBe(true);
+    });
+
+    it('dependent dependencies should work', function() {
+        var t = new w.Module('test', []),
+            isDone = false,
+            i;
+
+        t.value('cheese', 6).factory('parent', function(cheese) {
+            return cheese;
+        }).factory('test', function(parent) {
+            return parent;
+        }).run(function(test) {
+            isDone = true;
+            expect(test).toBe(6);
         });
 
         i = new I({testMod: t});

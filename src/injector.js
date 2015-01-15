@@ -241,6 +241,30 @@ workular.Injector.prototype.$$postFixProvider_ = function postFixProvider(a) {
 };
 
 /**
+ * @param {string} name
+ * @return {Array}
+ * @private
+ */
+workular.Injector.prototype.$$getRuntimeComponentDeps_ =
+function getRuntimeComponent(name) {
+    'use strict';
+
+    var c = this.$$findComponent_(name),
+    dependencies = [];
+    if (!c) {
+        throw new Error('component not found: ' + name + ' ' + typeof name);
+    }
+    // annotate functions
+    if (workular.componentsData.indexOf(c.type) > -1) {
+        dependencies = [];
+    } else {
+        dependencies = this.annotate(c.fn, this.$$strictDi_);
+    }
+
+    return dependencies.filter(workular.identity);
+};
+
+/**
  * @param {Array.<string>} names
  * @return {Object.<string, Array.<string>>}
  * @private
@@ -250,22 +274,19 @@ function getRuntimeDependencies(names) {
     'use strict';
 
     /** @type {Object.<string, Array.<string>>} */
-    var dependencies = {};
+    var dependencies = {}, that = this;
 
-    workular.forEach(names, function(name) {
+    workular.forEach(names, function getDepsDeps(name) {
         if (!name) {
             return;
         }
-        var c = this.$$findComponent_(name);
-        if (!c) {
-            throw new Error('component not found: ' + name + ' ' + typeof name);
-        }
-        // annotate functions
-        if (workular.componentsData.indexOf(c.type) > -1) {
-            dependencies[name] = [];
-        } else {
-            dependencies[name] = this.annotate(c.fn, this.$$strictDi_);
-        }
+        dependencies[name] = this.$$getRuntimeComponentDeps_(name);
+        dependencies[name].forEach(function(dep) {
+            if (dependencies[dep]) {
+                return;
+            }
+            getDepsDeps.call(that, dep);
+        });
     }, this);
 
     return dependencies;
@@ -540,7 +561,7 @@ function annotateStrict(fn, fnString) {
     'use strict';
 
     this.$$annotationCache_[fnString] = fn['$inject'].map(workular.toString);
-    return this.$$annotationCache_[fnString];
+    return this.$$annotationCache_[fnString].filter(workular.identity);
 };
 
 /**
@@ -558,11 +579,11 @@ function annotateRelaxed(fn, fnString) {
     if (fn['$inject'].length) {
         this.$$annotationCache_[fnString] =
         fn['$inject'].map(workular.toString);
-        return this.$$annotationCache_[fnString];
+        return this.$$annotationCache_[fnString].filter(workular.identity);
     }
     // try function parsing
     this.$$annotationCache_[fnString] = workular.Injector.$$getArgsFromFn(fn);
-    return this.$$annotationCache_[fnString];
+    return this.$$annotationCache_[fnString].filter(workular.identity);
 };
 
 /**
