@@ -187,9 +187,9 @@ function checkDependencies() {
             if (this.$$modules_[requiredModule]) {
                 return;
             }
-            throw new TypeError('workular: module', name,
-                                ' requires', requiredModule, ' but',
-                                requiredModule, ' not found');
+            throw new TypeError('workular: module: ' + name +
+                                ' requires' + requiredModule + ' but',
+                                requiredModule + ' not found');
         }, this);
     }, this);
 
