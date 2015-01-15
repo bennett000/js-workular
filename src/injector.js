@@ -188,7 +188,7 @@ function checkDependencies() {
                 return;
             }
             throw new TypeError('workular: module: ' + name +
-                                ' requires' + requiredModule + ' but',
+                                ' requires ' + requiredModule + ' but: ' +
                                 requiredModule + ' not found');
         }, this);
     }, this);
