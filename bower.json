@@ -1,0 +1,23 @@
+{
+  "name": "workular",
+  "version": "0.6.0",
+  "description": "Angular style dependency injection framework",
+  "moduleType": [
+    "globals"
+  ],
+  "main": [
+    "workular-debug.js",
+    "workular.js",
+    "workular.min.js",
+    "workular.min.js.map"
+  ],
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "lib",
+    "spec/**/*",
+    "src/**/*"
+  ]
+}

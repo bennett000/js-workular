@@ -3,6 +3,7 @@
   "description": "Angular.js style modules/dependency injection system for workers, and node",
   "version": "0.6.0",
   "private": true,
+  "main": "workular.js",
   "repository": {
     "type": "git",
     "url": "ssh://dev.higginsregister.com/srv/repo/js-workular.git"
@@ -10,14 +11,15 @@
   "devDependencies": {
     "grunt": "~0.4.3",
     "grunt-closure-compiler": "0.0.21",
+    "grunt-contrib-clean": "^0.6.0",
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-copy": "~0.5.0",
     "grunt-contrib-jshint": "~0.8.0",
     "grunt-contrib-uglify": "~0.4.0",
+    "grunt-insert": "^0.1.0",
     "grunt-jasmine-node-coverage": "^0.3.1",
-    "grunt-karma": "^0.9.0",
+    "grunt-karma": "^0.10.1",
     "grunt-mkdir": "~0.1.1",
-    "grunt-prettify": "^0.4.0",
     "jasmine-core": "^2.1.3",
     "jasmine-node": "~1.14.2",
     "karma": "^0.12.31",
@@ -25,6 +27,7 @@
     "karma-coverage": "^0.2.7",
     "karma-firefox-launcher": "^0.1.4",
     "karma-jasmine": "^0.3.4",
-    "karma-junit-reporter": "^0.2.2"
+    "karma-junit-reporter": "^0.2.2",
+    "uglify": "^0.1.1"
   }
 }
