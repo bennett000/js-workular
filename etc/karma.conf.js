@@ -4,7 +4,7 @@
 /*global module, require, __dirname */
 var build = require(__dirname + '/../build.js');
 
-module.exports = function (config) {
+module.exports = function(config) {
     'use strict';
 
     config.set({
@@ -17,14 +17,16 @@ module.exports = function (config) {
                    frameworks: ['jasmine'],
 
                    files: build.src.concat([
-                       // mocks & specs
-                       'spec/mock-*.js',
-                       'spec/*-spec.js'
-                   ]),
+                                               // workular's mock library
+                                               'src/workular-mock.js',
+
+                                               // mocks & specs
+                                               'spec/mock-*.js',
+                                               'spec/*-spec.js'
+                                           ]),
 
                    // list of files to exclude
-                   exclude: [
-                   ],
+                   exclude: [],
 
 
                    // test results reporter to use

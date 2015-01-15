@@ -56,6 +56,12 @@ module.exports = (grunt) ->
       nodeWrapper:
         src: 'etc/workular-node.js'
         dest: 'tmp/node.js'
+      nodeMock:
+        src: 'src/workular-mock.js'
+        dest: 'build/node/workular-mock.js'
+      browserMock:
+        src: 'src/workular-mock.js'
+        dest: 'build/browser/workular-mock.js'
 
     insert:
       browser:

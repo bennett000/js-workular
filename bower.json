@@ -1,12 +1,13 @@
 {
   "name": "workular",
-  "version": "0.6.5",
+  "version": "0.7.0",
   "description": "Angular style dependency injection framework",
   "moduleType": [
     "globals"
   ],
   "main": [
     "workular-debug.js",
+    "workular-mock.js",
     "workular.js",
     "workular.min.js",
     "workular.min.js.map",
