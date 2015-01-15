@@ -102,4 +102,13 @@ describe('workular preLogger', function () {
         //});
     });
 
+    it('should expose an upgradeLogger method on workular', function() {
+        expect(typeof workular.upgradeLogger).toBe('function');
+    });
+
+    it('upgradeLogger should call PreLog\'s upgrade', function() {
+        spyOn(workular.PreLog_.prototype, 'upgrade');
+        workular.upgradeLogger(console);
+        expect(workular.PreLog_.prototype.upgrade).toHaveBeenCalled();
+    });
 });
