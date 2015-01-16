@@ -21,6 +21,13 @@ workular.$$modules = {};
  */
 workular.$$injector = null;
 
+workular['$$reset'] = function reset() {
+    'use strict';
+
+    workular.$$injector = null;
+    workular.$$isBootstrapped = false;
+};
+
 /**
  * @param {string} name
  * @param {!Array.<string>=} requires

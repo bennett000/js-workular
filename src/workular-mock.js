@@ -7,8 +7,7 @@
 function wmodule(modules) {
     'use strict';
 
-    workular.$$isBootstrapped = false;
-    workular.$$injector = null;
+    workular.$$reset();
     workular.bootstrap(modules);
 }
 
