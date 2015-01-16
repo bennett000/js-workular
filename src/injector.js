@@ -652,7 +652,7 @@ function assembleComponent(c) {
     'use strict';
     if ((c.type === 'factory') || (c.type === 'filter')) {
         c.fn['$inject'] = this.annotate(c.fn, this.$$strictDi_);
-        this.$$cc_(c.module, c.type, c.name, this.invoke(c.fn));
+        return this.$$cc_(c.module, c.type, c.name, this.invoke(c.fn));
     } else if (c.type === 'service') {
         c.fn['$inject'] = this.annotate(c.fn, this.$$strictDi_);
         return this.$$cc_(c.module, c.type, c.name, this.instantiate(c.fn));
