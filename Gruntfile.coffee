@@ -81,16 +81,16 @@ module.exports = (grunt) ->
         preserveComments: true
       browser:
         src: 'tmp/browser.js'
-        dest: 'build/browser/workular.js'
+        dest: 'build/browser/workular-debug.js'
       node:
         src: 'tmp/node.js'
-        dest: 'build/node/workular.js'
+        dest: 'build/node/workular-debug.js'
       browserDebug:
         src: 'tmp/workular-concat.js'
-        dest: 'build/browser/workular-debug.js'
+        dest: 'build/browser/workular.js'
       nodeDebug:
         src: 'tmp/workular-concat.js'
-        dest: 'build/node/workular-debug.js'
+        dest: 'build/node/workular.js'
 
     'closure-compiler':
       workularBrowser:
