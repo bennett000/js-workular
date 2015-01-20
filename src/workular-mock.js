@@ -17,13 +17,8 @@ function winject(fn) {
         throw new TypeError('workular: injector expects a function');
     }
 
-    if (!workular.$$injector) {
-        throw new ReferenceError('workular: no current injector');
-    }
-
-    fn['$inject'] = workular.$$injector.annotate(fn);
-
     function injectionWrapper() {
+        fn['$inject'] = workular.$$injector.annotate(fn);
         return workular.$$injector.invoke(fn);
     }
     return injectionWrapper;
