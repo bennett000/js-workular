@@ -91,7 +91,7 @@ workular.PreLog_.prototype.getMethod_ = function getMethod(method) {
 /**
  * @type {workular.PreLog_|*}
  */
-workular.log = new workular.PreLog_();
+workular['log'] = new workular.PreLog_();
 workular['upgradeLogger'] = function upgradeLogger(newLog) {
     'use strict';
     return workular.log.upgrade(newLog);

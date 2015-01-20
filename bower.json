@@ -1,6 +1,6 @@
 {
   "name": "workular",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "description": "Angular style dependency injection framework",
   "moduleType": [
     "globals"
