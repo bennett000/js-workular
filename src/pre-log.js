@@ -96,3 +96,20 @@ workular['upgradeLogger'] = function upgradeLogger(newLog) {
     'use strict';
     return workular.log.upgrade(newLog);
 };
+
+/**
+ * @param {Error} err
+ * @private
+ */
+workular.$$onError_ = function onError(err) {
+    'use strict';
+    var msg = 'workular: uncaught error: ' + err.message + ' ==> ' + err.stack;
+
+    if (!workular.global.console) {
+        workular.log.error(msg);
+    } else {
+        workular.global.console.error(msg);
+    }
+};
+
+workular.global.addEventListener('error', workular.$$onerror_);
