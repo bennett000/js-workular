@@ -4,77 +4,90 @@
 /*global module, require, __dirname */
 var build = require(__dirname + '/../build.js');
 
-module.exports = function(config) {
+module.exports = function (config) {
     'use strict';
 
-    config.set({
-
-                   // base path, that will be used to resolve files and exclude
-                   basePath: '..',
-
-
-                   // frameworks to use
-                   frameworks: ['jasmine'],
-
-                   files: build.src.concat([
-                                               // workular's mock library
-                                               'src/workular-mock.js',
-
-                                               // mocks & specs
-                                               'spec/mock-*.js',
-                                               'spec/*-spec.js'
-                                           ]),
-
-                   // list of files to exclude
-                   exclude: [],
+    config.set(
+    {
+        // base path, that will be used to resolve files and exclude
+        basePath: '..',
 
 
-                   // test results reporter to use
-                   // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-                   reporters: ['progress', 'coverage'],
+        // frameworks to use
+        frameworks: ['jasmine'],
+
+        files: build.src.concat([
+                                    // workular's mock library
+                                    'src/workular-mock.js',
+
+                                    // mocks & specs
+                                    'spec/mock-*.js',
+                                    'spec/*-spec.js'
+                                ]),
+
+        // list of files to exclude
+        exclude: [],
 
 
-                   // web server port
-                   port: 9876,
+        // test results reporter to use
+        // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
+        reporters: ['progress', 'coverage'],
 
 
-                   // enable / disable colors in the output (reporters and logs)
-                   colors: true,
+        // web server port
+        port: 9876,
 
 
-                   // level of logging
-                   // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-                   logLevel: config.LOG_INFO,
+        // enable / disable colors in the output (reporters and logs)
+        colors: true,
 
 
-                   // enable / disable watching file and executing tests whenever any file changes
-                   autoWatch: false,
+        // level of logging
+        // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+        logLevel: config.LOG_INFO,
 
 
-                   // Start these browsers, currently available:
-                   // - Chrome
-                   // - ChromeCanary
-                   // - Firefox
-                   // - Opera (has to be installed with `npm install karma-opera-launcher`)
-                   // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
-                   // - PhantomJS
-                   // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-                   browsers: ['Firefox'], //, 'PhantomJS', 'Chrome'],
+        // enable / disable watching file and executing tests whenever any file changes
+        autoWatch: false,
 
 
-                   // If browser does not capture in given timeout [ms], kill it
-                   captureTimeout: 60000,
+        // Start these browsers, currently available:
+        // - Chrome
+        // - ChromeCanary
+        // - Firefox
+        // - Opera (has to be installed with `npm install karma-opera-launcher`)
+        // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
+        // - PhantomJS
+        // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
+        browsers: ['Firefox'], //, 'PhantomJS', 'Chrome'],
 
 
-                   // Continuous Integration mode
-                   // if true, it capture browsers, run tests and exit
-                   singleRun: false,
+        // If browser does not capture in given timeout [ms], kill it
+        captureTimeout: 60000,
 
-                   // coverage support
-                   preprocessors: {
-                       'src/*.js': ['coverage'],
-                       'src/js/**/*.js': ['coverage']
-                   }
-               });
+
+        // Continuous Integration mode
+        // if true, it capture browsers, run tests and exit
+        singleRun: false,
+
+        // coverage support
+        preprocessors: {
+            'src/*.js': ['coverage'],
+            'src/js/**/*.js': ['coverage']
+        },
+
+        coverageReporter: {
+            dir: 'coverage/',
+            reporters: [
+                { type: 'html', subdir: 'report-html' },
+                { type: 'lcov', subdir: 'report-lcov' },
+                { type: 'cobertura', subdir: '.', file: 'cobertura.txt' },
+                { type: 'lcovonly', subdir: '.', file: 'report-lcovonly.txt' },
+                { type: 'teamcity', subdir: '.', file: 'teamcity.txt' },
+                { type: 'text', subdir: '.', file: 'text.txt' },
+                { type: 'text-summary', subdir: '.', file: 'text-summary.txt' }
+            ]
+        }
+    });
 };
 

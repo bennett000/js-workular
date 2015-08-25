@@ -1,6 +1,8 @@
 Workular
 ========
 
+[![Build Status](https://travis-ci.org/bennett000/js-workular.svg?branch=master)](https://travis-ci.org/bennett000/js-workular) [![Code Climate](https://codeclimate.com/github/bennett000/js-workular/badges/gpa.svg)](https://codeclimate.com/github/bennett000/js-workular) [![Test Coverage](https://codeclimate.com/github/bennett000/js-workular/badges/coverage.svg)](https://codeclimate.com/github/bennett000/js-workular/coverage)
+
 Workular is a JavaScript library that provides [Angular.js](http://angularjs.org/)
 style modules, and dependency injection to JavaScript
 [WebWorkers](https://developer.mozilla.org/en-US/docs/Web/Guide/Performance/Using_web_workers),
